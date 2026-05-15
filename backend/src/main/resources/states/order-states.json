@@ -1,0 +1,37 @@
+[
+  {
+    "entity": "ORDER",
+    "from": "PLACED",
+    "to": ["CONFIRMED"],
+    "action": "ADMIN_UPDATE",
+    "sideEffect": null
+  },
+  {
+    "entity": "ORDER",
+    "from": "CONFIRMED",
+    "to": ["PACKED"],
+    "action": "ADMIN_UPDATE",
+    "sideEffect": null
+  },
+  {
+    "entity": "ORDER",
+    "from": "PACKED",
+    "to": ["DELIVERED"],
+    "action": "ADMIN_UPDATE",
+    "sideEffect": null
+  },
+  {
+    "entity": "ORDER",
+    "from": "PLACED",
+    "to": ["CANCELLED"],
+    "action": "CUSTOMER_CANCEL",
+    "sideEffect": null
+  },
+  {
+    "entity": "ORDER",
+    "from": "CONFIRMED",
+    "to": ["CANCELLED"],
+    "action": "ADMIN_UPDATE",
+    "sideEffect": null
+  }
+]

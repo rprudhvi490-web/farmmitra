@@ -1,0 +1,16 @@
+[
+  {
+    "entity": "DELIVERY_BATCH",
+    "from": "PENDING",
+    "to": ["IN_PROGRESS"],
+    "action": "ADMIN_UPDATE",
+    "sideEffect": null
+  },
+  {
+    "entity": "DELIVERY_BATCH",
+    "from": "IN_PROGRESS",
+    "to": ["DONE"],
+    "action": "DELIVERY_COMPLETE",
+    "sideEffect": "BATCH_COMPLETED_EVENT"
+  }
+]

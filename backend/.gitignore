@@ -1,0 +1,25 @@
+# Local dev config — contains DB credentials, never commit
+application-local.properties
+
+# Build output
+target/
+*.class
+*.jar
+*.war
+
+# IDE
+.idea/
+*.iml
+.eclipse/
+.settings/
+.classpath
+.project
+.factorypath
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

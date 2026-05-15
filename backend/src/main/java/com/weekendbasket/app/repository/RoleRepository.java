@@ -1,0 +1,11 @@
+package com.weekendbasket.app.repository;
+
+import com.weekendbasket.app.model.Role;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+public interface RoleRepository extends JpaRepository<Role, Long> {
+    Optional<Role> findByRoleId(String roleId);
+    boolean existsByRoleId(String roleId);
+}
