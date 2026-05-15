@@ -1,0 +1,92 @@
+<div class="page-container">
+  <a mat-button routerLink="/customer/orders" class="back-btn">← My Orders</a>
+
+  @if (loading()) {
+    <div class="center-spinner"><mat-spinner diameter="48" /></div>
+  } @else if (order(); as o) {
+
+    <div class="order-header">
+      <h2>{{ o.orderNumber }}</h2>
+      <span class="status-chip {{ getStatusClass(o.status) }}">{{ o.status }}</span>
+    </div>
+
+    <!-- Items -->
+    <mat-card class="section-card">
+      <mat-card-header><mat-card-title>Items</mat-card-title></mat-card-header>
+      <mat-card-content>
+        @for (item of o.items; track item.productId) {
+          <div class="item-row">
+            <span class="item-name">{{ item.productName }}</span>
+            <span class="item-qty">{{ item.quantity }} {{ item.unit }}</span>
+            <span class="item-price">₹{{ item.totalPrice }}</span>
+          </div>
+        }
+        <div class="total-row">
+          <span>Total</span>
+          <span class="total">₹{{ o.totalAmount }}</span>
+        </div>
+        @if (o.referralDiscount > 0) {
+          <div class="discount-row">
+            <span>Referral Discount</span>
+            <span class="discount">-₹{{ o.referralDiscount }}</span>
+          </div>
+          <div class="total-row">
+            <span>Amount to Pay</span>
+            <span class="total">₹{{ o.amountToCollect }}</span>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Delivery Info -->
+    <mat-card class="section-card">
+      <mat-card-header><mat-card-title>Delivery</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <div class="info-row">
+          <mat-icon>payments</mat-icon>
+          <span>{{ o.paymentMethod }} — {{ o.paymentStatus }}</span>
+        </div>
+        @if (o.deliverySlot) {
+          <div class="info-row">
+            <mat-icon>event</mat-icon>
+            <span>{{ o.deliverySlot === 'SAT' ? 'Saturday' : 'Sunday' }}</span>
+          </div>
+        }
+        @if (o.notes) {
+          <div class="info-row">
+            <mat-icon>note</mat-icon>
+            <span>{{ o.notes }}</span>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Transport Timeline -->
+    @if (stages().length > 0) {
+      <mat-card class="section-card">
+        <mat-card-header><mat-card-title>Order Tracking</mat-card-title></mat-card-header>
+        <mat-card-content>
+          <div class="timeline">
+            @for (stage of stages(); track stage.id) {
+              <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                  <div class="stage-label">{{ getStageLabel(stage.stage) }}</div>
+                  @if (stage.notes) { <div class="stage-notes">{{ stage.notes }}</div> }
+                  <div class="stage-time">{{ stage.createdOn | date:'dd MMM, hh:mm a' }}</div>
+                </div>
+              </div>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- Cancel -->
+    @if (o.status === 'PLACED') {
+      <button mat-stroked-button class="cancel-btn" [disabled]="cancelling()" (click)="cancel()">
+        @if (cancelling()) { <mat-spinner diameter="18" /> } @else { Cancel Order }
+      </button>
+    }
+  }
+</div>

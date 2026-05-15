@@ -1,0 +1,42 @@
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.page-title { margin: 0; font-size: 22px; }
+.cycle-select { min-width: 240px; }
+.form-card { margin-bottom: 24px; border-radius: 12px; }
+.form-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding-top: 8px; }
+.notes-field { flex: 1; min-width: 200px; }
+.add-btn { background: #2e7d32; color: white; height: 56px; }
+.center-spinner { display: flex; justify-content: center; padding: 60px; }
+.empty-card { text-align: center; padding: 32px; color: #757575; }
+
+.timeline { padding: 8px 0; }
+.timeline-item {
+  display: flex;
+  gap: 16px;
+  padding-bottom: 24px;
+  position: relative;
+
+  &:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 16px;
+    bottom: 0;
+    width: 2px;
+    background: #e0e0e0;
+  }
+}
+
+.timeline-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #2e7d32;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.timeline-content {
+  .stage-label { font-weight: 600; font-size: 15px; color: #212121; }
+  .stage-notes { font-size: 13px; color: #555; margin-top: 2px; }
+  .stage-time  { font-size: 12px; color: #9e9e9e; margin-top: 4px; }
+}

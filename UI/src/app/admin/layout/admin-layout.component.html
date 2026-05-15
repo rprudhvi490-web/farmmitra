@@ -1,0 +1,48 @@
+<mat-sidenav-container class="sidenav-container">
+
+  <mat-sidenav [opened]="sidenavOpen()" mode="side" class="sidenav">
+    <div class="sidenav-header">
+      <img src="farmmitra-logo.png" alt="FarmMitra" class="brand-logo" />
+      <span class="brand-name">FarmMitra</span>
+    </div>
+
+    <mat-nav-list>
+      @for (item of navItems; track item.route) {
+        <a mat-list-item
+           [routerLink]="item.route"
+           routerLinkActive="active-link">
+          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+          <span matListItemTitle>{{ item.label }}</span>
+        </a>
+      }
+    </mat-nav-list>
+
+    <div class="sidenav-footer">
+      <span class="phone">{{ tokenService.getPhone() }}</span>
+      <span class="role">Super Admin</span>
+    </div>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <mat-toolbar class="toolbar">
+      <button mat-icon-button (click)="toggleSidenav()">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <span class="toolbar-title">Admin Panel</span>
+      <span class="spacer"></span>
+      <button mat-icon-button [matMenuTriggerFor]="profileMenu">
+        <mat-icon>account_circle</mat-icon>
+      </button>
+      <mat-menu #profileMenu="matMenu">
+        <button mat-menu-item (click)="logout()">
+          <mat-icon>logout</mat-icon> Logout
+        </button>
+      </mat-menu>
+    </mat-toolbar>
+
+    <div class="content">
+      <router-outlet />
+    </div>
+  </mat-sidenav-content>
+
+</mat-sidenav-container>

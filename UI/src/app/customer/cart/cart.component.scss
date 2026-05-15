@@ -1,0 +1,72 @@
+.empty-cart {
+  text-align: center;
+  padding: 80px 16px;
+  color: var(--fm-text-hint);
+  mat-icon { font-size: 64px; width: 64px; height: 64px; opacity: 0.35; }
+  p { font-size: 18px; margin: 16px 0; font-weight: 700; font-family: var(--fm-font); }
+  .shop-btn { background: var(--fm-primary) !important; color: white !important; font-weight: 700; font-family: var(--fm-font); }
+}
+
+.cart-card { border-radius: var(--fm-radius-md) !important; }
+
+.cart-item {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  gap: 16px;
+  transition: background 0.1s;
+
+  &:hover { background: var(--fm-background); }
+
+  .item-info {
+    flex: 1;
+    .item-name  { font-weight: 700; font-size: 15px; font-family: var(--fm-font); color: var(--fm-text); }
+    .item-price { font-size: 13px; color: var(--fm-text-hint); margin-top: 2px; font-family: var(--fm-font); }
+  }
+
+  .item-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--fm-background);
+    border-radius: var(--fm-radius-sm);
+    padding: 4px 8px;
+    .qty { font-size: 14px; font-weight: 700; font-family: var(--fm-font); min-width: 60px; text-align: center; }
+  }
+
+  .item-total { font-weight: 800; font-size: 16px; font-family: var(--fm-font); color: var(--fm-primary); min-width: 60px; text-align: right; }
+}
+
+.cart-summary {
+  padding: 16px;
+  border-top: 1px solid var(--fm-divider);
+  background: var(--fm-green-50);
+  border-radius: 0 0 var(--fm-radius-md) var(--fm-radius-md);
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    font-size: 15px;
+    font-family: var(--fm-font);
+    font-weight: 600;
+    .total { font-size: 24px; font-weight: 800; color: var(--fm-primary); }
+  }
+
+  .checkout-btn {
+    width: 100%;
+    height: 50px;
+    background: var(--fm-primary) !important;
+    color: white !important;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: var(--fm-font);
+    border-radius: var(--fm-radius-md) !important;
+    box-shadow: 0 4px 12px rgba(46, 125, 50, 0.25) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+}

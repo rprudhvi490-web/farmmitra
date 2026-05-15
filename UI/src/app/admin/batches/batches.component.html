@@ -1,0 +1,134 @@
+<div class="page-header">
+  <h2 class="page-title">Delivery Batches</h2>
+  <div class="header-actions">
+    <mat-form-field appearance="outline" class="cycle-select">
+      <mat-label>Cycle</mat-label>
+      <mat-select [value]="selectedCycleId()" (selectionChange)="onCycleChange($event.value)">
+        @for (c of cycles(); track c.id) {
+          <mat-option [value]="c.id">{{ c.cycleLabel }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <button mat-flat-button class="create-btn" (click)="showCreateForm.set(!showCreateForm())">
+      <mat-icon>add</mat-icon> New Batch
+    </button>
+  </div>
+</div>
+
+<!-- Create Batch Form -->
+@if (showCreateForm()) {
+  <mat-card class="form-card">
+    <mat-card-header><mat-card-title>Create Delivery Batch</mat-card-title></mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="createForm" class="form-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Batch Label</mat-label>
+          <input matInput formControlName="batchLabel" placeholder="e.g. Block A — Saturday" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Delivery Date</mat-label>
+          <input matInput type="date" formControlName="deliveryDate" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Assign Delivery Staff</mat-label>
+          <mat-select formControlName="assignedToUserId">
+            <mat-option [value]="null">Unassigned</mat-option>
+            @for (staff of deliveryStaff(); track staff.userId) {
+              <mat-option [value]="staff.userId">{{ staff.username }} ({{ staff.phoneNumber }})</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Select Orders</mat-label>
+          <mat-select formControlName="orderIds" multiple>
+            @for (order of getUnassignedOrders(); track order.id) {
+              <mat-option [value]="order.id">{{ order.orderNumber }} — {{ order.phoneNumber }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </form>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-flat-button class="create-btn" (click)="createBatch()" [disabled]="saving()">
+        @if (saving()) { <mat-spinner diameter="18" /> } @else { Create Batch }
+      </button>
+      <button mat-button (click)="showCreateForm.set(false)">Cancel</button>
+    </mat-card-actions>
+  </mat-card>
+}
+
+<!-- Batches List -->
+@if (loading()) {
+  <div class="center-spinner"><mat-spinner diameter="48" /></div>
+} @else if (batches().length === 0) {
+  <mat-card class="empty-card">
+    <mat-card-content>No batches yet. Create a batch to group orders for delivery.</mat-card-content>
+  </mat-card>
+} @else {
+  <mat-accordion>
+    @for (batch of batches(); track batch.id) {
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>{{ batch.batchLabel }}</mat-panel-title>
+          <mat-panel-description>
+            {{ batch.deliveryDate | date:'dd MMM' }} ·
+            {{ batch.orders.length }} orders ·
+            <span class="status-chip status-{{ batch.status.toLowerCase() }}">{{ batch.status }}</span>
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <!-- Assign Staff -->
+        <div class="batch-actions">
+          <mat-form-field appearance="outline" class="staff-select">
+            <mat-label>Delivery Staff</mat-label>
+            <mat-select [value]="batch.assignedToUserId"
+                        (selectionChange)="assignStaff(batch.id, $event.value)">
+              @for (staff of deliveryStaff(); track staff.userId) {
+                <mat-option [value]="staff.userId">{{ staff.username }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Orders in Batch -->
+        @if (batch.orders.length === 0) {
+          <p class="no-orders">No orders in this batch.</p>
+        } @else {
+          <table mat-table [dataSource]="batch.orders" class="full-width">
+            <ng-container matColumnDef="order">
+              <th mat-header-cell *matHeaderCellDef>Order #</th>
+              <td mat-cell *matCellDef="let o">{{ o.orderNumber }}</td>
+            </ng-container>
+            <ng-container matColumnDef="customer">
+              <th mat-header-cell *matHeaderCellDef>Customer</th>
+              <td mat-cell *matCellDef="let o">{{ o.customerName }}</td>
+            </ng-container>
+            <ng-container matColumnDef="flat">
+              <th mat-header-cell *matHeaderCellDef>Flat</th>
+              <td mat-cell *matCellDef="let o">{{ o.flatNumber }} {{ o.block }}</td>
+            </ng-container>
+            <ng-container matColumnDef="slot">
+              <th mat-header-cell *matHeaderCellDef>Slot</th>
+              <td mat-cell *matCellDef="let o">{{ o.deliverySlot ?? '—' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="action">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let o">
+                @if (o.orderStatus === 'DELIVERED') {
+                  <span class="delivered-label">✓ Delivered</span>
+                } @else {
+                  <button mat-stroked-button class="deliver-btn"
+                          (click)="markDelivered(batch.id, o.orderId)">
+                    <mat-icon>check_circle</mat-icon> Mark Delivered
+                  </button>
+                }
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="['order','customer','flat','slot','action']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['order','customer','flat','slot','action'];"></tr>
+          </table>
+        }
+      </mat-expansion-panel>
+    }
+  </mat-accordion>
+}

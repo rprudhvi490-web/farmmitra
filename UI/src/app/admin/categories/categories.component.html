@@ -1,0 +1,94 @@
+<div class="page-header">
+  <h2 class="page-title">Categories</h2>
+  <button mat-flat-button class="create-btn" (click)="openCreate()">
+    <mat-icon>add</mat-icon> New Category
+  </button>
+</div>
+
+@if (showForm()) {
+  <mat-card class="form-card">
+    <mat-card-header>
+      <mat-card-title>{{ editingId() ? 'Edit Category' : 'New Category' }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="form" class="form-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Name</mat-label>
+          <input matInput formControlName="name" placeholder="e.g. Vegetables" />
+          @if (form.get('name')?.hasError('required') && form.get('name')?.touched) {
+            <mat-error>Name is required</mat-error>
+          }
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Display Order</mat-label>
+          <input matInput type="number" formControlName="displayOrder" />
+        </mat-form-field>
+        <div class="image-upload-section">
+          <div class="image-label">Category Image</div>
+          <div class="image-row">
+            @if (form.get('imageUrl')?.value) {
+              <img [src]="form.get('imageUrl')?.value" class="image-preview" alt="preview" />
+            }
+            <label class="upload-btn">
+              @if (uploading()) {
+                <mat-spinner diameter="20" />
+              } @else {
+                <mat-icon>cloud_upload</mat-icon>
+                {{ form.get('imageUrl')?.value ? 'Change Image' : 'Upload Image' }}
+              }
+              <input type="file" accept="image/*" (change)="onImageSelected($event)" hidden />
+            </label>
+          </div>
+        </div>
+      </form>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-flat-button class="create-btn" (click)="save()" [disabled]="saving() || uploading()">
+        @if (saving()) { <mat-spinner diameter="18" /> } @else { Save }
+      </button>
+      <button mat-button (click)="cancel()">Cancel</button>
+    </mat-card-actions>
+  </mat-card>
+}
+
+@if (loading()) {
+  <div class="center-spinner"><mat-spinner diameter="48" /></div>
+} @else if (categories().length === 0) {
+  <mat-card class="empty-card"><mat-card-content>No categories yet.</mat-card-content></mat-card>
+} @else {
+  <mat-card>
+    <table mat-table [dataSource]="categories()" class="full-width">
+      <ng-container matColumnDef="image">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let c">
+          @if (c.imageUrl) { <img [src]="c.imageUrl" class="table-img" [alt]="c.name" /> }
+          @else { <mat-icon class="no-img">category</mat-icon> }
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Name</th>
+        <td mat-cell *matCellDef="let c">{{ c.name }}</td>
+      </ng-container>
+      <ng-container matColumnDef="displayOrder">
+        <th mat-header-cell *matHeaderCellDef>Order</th>
+        <td mat-cell *matCellDef="let c">{{ c.displayOrder }}</td>
+      </ng-container>
+      <ng-container matColumnDef="active">
+        <th mat-header-cell *matHeaderCellDef>Active</th>
+        <td mat-cell *matCellDef="let c">
+          <mat-icon [style.color]="c.active ? '#2e7d32' : '#bdbdbd'">
+            {{ c.active ? 'check_circle' : 'cancel' }}
+          </mat-icon>
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let c">
+          <button mat-icon-button (click)="openEdit(c)"><mat-icon>edit</mat-icon></button>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="columns"></tr>
+      <tr mat-row *matRowDef="let row; columns: columns;"></tr>
+    </table>
+  </mat-card>
+}

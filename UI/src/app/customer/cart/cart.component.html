@@ -1,0 +1,44 @@
+<div class="page-container">
+  <h2 class="page-title">My Cart</h2>
+
+  @if (items().length === 0) {
+    <div class="empty-cart">
+      <mat-icon>shopping_cart</mat-icon>
+      <p>Your cart is empty</p>
+      <a mat-flat-button class="shop-btn" routerLink="/customer/products">Browse Products</a>
+    </div>
+  } @else {
+    <mat-card class="cart-card">
+      @for (item of items(); track item.productId) {
+        <div class="cart-item">
+          <div class="item-info">
+            <div class="item-name">{{ item.productName }}</div>
+            <div class="item-price">₹{{ item.pricePerUnit }} / {{ item.unit }}</div>
+          </div>
+          <div class="item-controls">
+            <button mat-icon-button (click)="adjustQty(item, -item.minOrderQty)">
+              <mat-icon>{{ item.quantity <= item.minOrderQty ? 'delete' : 'remove' }}</mat-icon>
+            </button>
+            <span class="qty">{{ item.quantity }} {{ item.unit }}</span>
+            <button mat-icon-button (click)="adjustQty(item, item.minOrderQty)">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+          <div class="item-total">₹{{ item.totalPrice.toFixed(0) }}</div>
+        </div>
+        <mat-divider />
+      }
+
+      <div class="cart-summary">
+        <div class="summary-row">
+          <span>{{ items().length }} item(s)</span>
+          <span class="total">₹{{ getTotal().toFixed(0) }}</span>
+        </div>
+        <button mat-flat-button class="checkout-btn" (click)="checkout()">
+          <mat-icon>shopping_bag</mat-icon>
+          Proceed to Checkout
+        </button>
+      </div>
+    </mat-card>
+  }
+</div>

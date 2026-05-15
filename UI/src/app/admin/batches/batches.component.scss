@@ -1,0 +1,16 @@
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 16px; }
+.page-title { margin: 0; font-size: 22px; }
+.header-actions { display: flex; align-items: center; gap: 12px; }
+.cycle-select { min-width: 240px; }
+.create-btn { background: #2e7d32; color: white; }
+.form-card { margin-bottom: 24px; border-radius: 12px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding-top: 8px; }
+.center-spinner { display: flex; justify-content: center; padding: 60px; }
+.empty-card { text-align: center; padding: 32px; color: #757575; }
+.batch-actions { margin-bottom: 16px; }
+.staff-select { min-width: 240px; }
+.full-width { width: 100%; }
+.no-orders { color: #9e9e9e; font-size: 14px; padding: 8px 0; }
+.deliver-btn { color: #2e7d32; border-color: #2e7d32; font-size: 12px; }
+.delivered-label { color: #2e7d32; font-weight: 600; font-size: 13px; }
+.status-chip { padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }

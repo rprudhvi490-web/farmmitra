@@ -1,0 +1,60 @@
+<mat-toolbar class="navbar">
+  <a routerLink="/customer/home" class="brand">
+    <img src="farmmitra-logo.png" alt="FarmMitra" class="brand-logo" />
+    <span class="brand-name">FarmMitra</span>
+  </a>
+
+  <span class="spacer"></span>
+
+  <nav class="nav-links">
+    <a mat-button routerLink="/customer/products" routerLinkActive="active-link">
+      Shop
+    </a>
+    <a mat-button routerLink="/customer/orders" routerLinkActive="active-link">
+      Orders
+    </a>
+  </nav>
+
+  <!-- Notification Bell -->
+  <a mat-icon-button routerLink="/customer/notifications" class="notif-btn" aria-label="Notifications">
+    <mat-icon>notifications</mat-icon>
+    @if (unreadCount() > 0) {
+      <span class="notif-badge">{{ unreadCount() }}</span>
+    }
+  </a>
+
+  <!-- Cart -->
+  <a mat-icon-button routerLink="/customer/cart" class="cart-btn" aria-label="Cart">
+    <mat-icon>shopping_cart</mat-icon>
+    @if (cartCount() > 0) {
+      <span class="cart-badge">{{ cartCount() }}</span>
+    }
+  </a>
+
+  <!-- Profile menu -->
+  <div class="profile-btn-wrap">
+    <button mat-icon-button [matMenuTriggerFor]="profileMenu" aria-label="Profile">
+      <mat-icon>account_circle</mat-icon>
+    </button>
+    <span class="profile-name">{{ username }}</span>
+  </div>
+  <mat-menu #profileMenu="matMenu">
+    <div class="menu-header">{{ phone }}</div>
+    <a mat-menu-item routerLink="/customer/profile">
+      <mat-icon>person</mat-icon> Profile
+    </a>
+    <a mat-menu-item routerLink="/customer/orders">
+      <mat-icon>receipt_long</mat-icon> My Orders
+    </a>
+    <a mat-menu-item routerLink="/customer/referral">
+      <mat-icon>card_giftcard</mat-icon> Referral
+    </a>
+    <button mat-menu-item (click)="logout()">
+      <mat-icon>logout</mat-icon> Logout
+    </button>
+  </mat-menu>
+</mat-toolbar>
+
+<main class="content">
+  <router-outlet />
+</main>

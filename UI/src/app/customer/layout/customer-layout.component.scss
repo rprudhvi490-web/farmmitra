@@ -1,0 +1,118 @@
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--fm-primary);
+  color: white;
+  box-shadow: 0 2px 12px rgba(27, 94, 32, 0.3);
+  padding: 0 16px;
+  gap: 4px;
+  font-family: var(--fm-font);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: white;
+  font-size: 20px;
+  font-weight: 800;
+  font-family: var(--fm-font);
+  letter-spacing: -0.3px;
+
+  .brand-logo {
+    width: 34px;
+    height: 34px;
+    object-fit: contain;
+    border-radius: 6px;
+    background: white;
+    padding: 3px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+
+  @media (max-width: 480px) {
+    .brand-name { display: none; }
+  }
+}
+
+.spacer { flex: 1; }
+
+.nav-links {
+  display: flex;
+  gap: 2px;
+
+  a {
+    color: rgba(255,255,255,0.85);
+    font-size: 14px;
+    font-weight: 600;
+    font-family: var(--fm-font);
+    border-radius: var(--fm-radius-sm);
+    transition: background 0.15s;
+
+    &:hover { background: rgba(255,255,255,0.12); color: white; }
+    &.active-link { color: white; background: rgba(255,255,255,0.15); }
+  }
+
+  @media (max-width: 600px) { display: none; }
+}
+
+.cart-btn, .notif-btn {
+  position: relative;
+  color: rgba(255,255,255,0.9) !important;
+
+  .cart-badge, .notif-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: var(--fm-accent);
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
+    font-weight: 800;
+    font-family: var(--fm-font);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--fm-primary);
+  }
+}
+
+.profile-btn-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+  cursor: pointer;
+
+  button { color: rgba(255,255,255,0.9) !important; }
+
+  .profile-name {
+    font-size: 10px;
+    font-weight: 700;
+    font-family: var(--fm-font);
+    color: rgba(255,255,255,0.85);
+    max-width: 72px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-top: -4px;
+  }
+}
+
+.menu-header {
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--fm-font);
+  color: var(--fm-text-secondary);
+  border-bottom: 1px solid var(--fm-divider);
+  pointer-events: none;
+}
+
+.content {
+  min-height: calc(100vh - 64px);
+  background: var(--fm-background);
+}

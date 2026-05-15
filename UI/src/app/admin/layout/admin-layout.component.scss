@@ -1,0 +1,102 @@
+.sidenav-container { height: 100vh; }
+
+.sidenav {
+  width: 240px;
+  background: var(--fm-primary-dark);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  border-right: none !important;
+}
+
+.sidenav-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 16px;
+  font-size: 18px;
+  font-weight: 800;
+  font-family: var(--fm-font);
+  letter-spacing: -0.3px;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+
+  .brand-logo {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+    border-radius: 6px;
+    background: white;
+    padding: 3px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  }
+
+  .brand-name { color: white; }
+}
+
+mat-nav-list {
+  flex: 1;
+  padding-top: 8px;
+
+  a {
+    color: rgba(255,255,255,0.8);
+    border-radius: var(--fm-radius-sm);
+    margin: 2px 8px;
+    font-family: var(--fm-font);
+    font-weight: 600;
+    font-size: 14px;
+    transition: background 0.15s;
+
+    &:hover {
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
+
+    mat-icon { color: rgba(255,255,255,0.6); }
+  }
+
+  .active-link {
+    background: rgba(255,255,255,0.15) !important;
+    color: white !important;
+    border-left: 3px solid var(--fm-accent);
+    padding-left: 13px;
+
+    mat-icon { color: white !important; }
+  }
+}
+
+.sidenav-footer {
+  padding: 16px;
+  border-top: 1px solid rgba(255,255,255,0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  .phone { font-size: 13px; font-weight: 600; font-family: var(--fm-font); color: rgba(255,255,255,0.9); }
+  .role  { font-size: 11px; font-family: var(--fm-font); color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.5px; }
+}
+
+.toolbar {
+  background: var(--fm-surface);
+  color: var(--fm-text);
+  box-shadow: var(--fm-shadow-sm);
+  border-bottom: 1px solid var(--fm-divider);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+
+  .toolbar-title {
+    font-size: 16px;
+    font-weight: 700;
+    font-family: var(--fm-font);
+    margin-left: 8px;
+    color: var(--fm-primary);
+  }
+
+  .spacer { flex: 1; }
+}
+
+.content {
+  padding: 24px;
+  background: var(--fm-background);
+  min-height: calc(100vh - 64px);
+}

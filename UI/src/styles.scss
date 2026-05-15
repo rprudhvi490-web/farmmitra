@@ -1,0 +1,218 @@
+@use '@angular/material' as mat;
+
+html {
+  height: 100%;
+  @include mat.theme((
+    color: (
+      primary: mat.$green-palette,
+      tertiary: mat.$orange-palette,
+    ),
+    typography: Roboto,
+    density: 0,
+  ));
+}
+
+// ── FarmMitra Design Tokens ───────────────────────────────────
+:root {
+  // Brand palette — derived from FarmMitra logo
+  --fm-green-900:   #1b5e20;   // darkest — admin sidebar, deep accents
+  --fm-green-800:   #2e7d32;   // primary — buttons, links, active states
+  --fm-green-700:   #388e3c;   // hover state
+  --fm-green-100:   #e8f5e9;   // light tint — backgrounds, chips
+  --fm-green-50:    #f1f8e9;   // very light — page backgrounds
+
+  --fm-orange-800:  #bf360c;   // dark orange — error-adjacent
+  --fm-orange-700:  #e65100;   // accent — harvest warmth, CTAs
+  --fm-orange-600:  #f4511e;   // hover
+  --fm-orange-100:  #fff3e0;   // light tint
+  --fm-orange-50:   #fff8e1;   // very light
+
+  --fm-earth-100:   #efebe9;   // warm brown tint — earthy feel
+  --fm-earth-50:    #faf7f5;   // page background — warm off-white
+
+  // Semantic tokens
+  --fm-primary:         var(--fm-green-800);
+  --fm-primary-dark:    var(--fm-green-900);
+  --fm-primary-hover:   var(--fm-green-700);
+  --fm-primary-light:   var(--fm-green-100);
+  --fm-accent:          var(--fm-orange-700);
+  --fm-accent-light:    var(--fm-orange-100);
+
+  --fm-surface:         #ffffff;
+  --fm-surface-raised:  #ffffff;
+  --fm-background:      var(--fm-earth-50);
+  --fm-background-alt:  var(--fm-green-50);
+
+  --fm-text:            #1a1a1a;
+  --fm-text-secondary:  #5a5a5a;
+  --fm-text-hint:       #9e9e9e;
+  --fm-border:          #e0ddd8;
+  --fm-divider:         #f0ede8;
+
+  // Elevation shadows — warm-tinted
+  --fm-shadow-sm:   0 1px 4px rgba(46, 125, 50, 0.08);
+  --fm-shadow-md:   0 4px 16px rgba(46, 125, 50, 0.10);
+  --fm-shadow-lg:   0 8px 32px rgba(46, 125, 50, 0.12);
+
+  // Spacing scale
+  --fm-radius-sm:   8px;
+  --fm-radius-md:   12px;
+  --fm-radius-lg:   16px;
+  --fm-radius-xl:   24px;
+
+  // Typography
+  --fm-font:        'Nunito', 'Roboto', sans-serif;
+}
+
+// ── Base Reset ────────────────────────────────────────────────
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  color-scheme: light;
+  background-color: var(--fm-background);
+  color: var(--fm-text);
+  margin: 0;
+  height: 100%;
+  font-family: var(--fm-font);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--fm-font);
+  font-weight: 700;
+  color: var(--fm-text);
+  margin: 0;
+}
+
+// ── Material Component Overrides ──────────────────────────────
+
+// Cards — warm shadow, rounded
+.mat-mdc-card {
+  border-radius: var(--fm-radius-md) !important;
+  box-shadow: var(--fm-shadow-sm) !important;
+  border: 1px solid var(--fm-divider) !important;
+}
+
+// Buttons — Nunito font, rounded
+.mat-mdc-button,
+.mat-mdc-raised-button,
+.mat-mdc-flat-button,
+.mat-mdc-outlined-button,
+.mat-mdc-icon-button {
+  font-family: var(--fm-font) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.3px !important;
+  border-radius: var(--fm-radius-sm) !important;
+}
+
+// Primary flat buttons — green
+.mat-mdc-flat-button.mat-primary,
+button.mat-mdc-flat-button[color="primary"] {
+  background-color: var(--fm-primary) !important;
+  color: white !important;
+}
+
+// Form fields — Nunito
+.mat-mdc-form-field {
+  font-family: var(--fm-font) !important;
+}
+
+// Tabs — Nunito
+.mat-mdc-tab {
+  font-family: var(--fm-font) !important;
+  font-weight: 600 !important;
+}
+
+// Table headers
+.mat-mdc-header-cell {
+  font-family: var(--fm-font) !important;
+  font-weight: 700 !important;
+  font-size: 12px !important;
+  color: var(--fm-text-secondary) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mat-mdc-cell {
+  font-family: var(--fm-font) !important;
+  font-size: 14px !important;
+}
+
+// Snackbar
+.mat-mdc-snack-bar-container {
+  font-family: var(--fm-font) !important;
+}
+
+// ── Utility Classes ───────────────────────────────────────────
+.full-width       { width: 100%; }
+.text-center      { text-align: center; }
+.mt-8             { margin-top: 8px; }
+.mt-16            { margin-top: 16px; }
+.mt-24            { margin-top: 24px; }
+.mb-8             { margin-bottom: 8px; }
+.mb-16            { margin-bottom: 16px; }
+.p-16             { padding: 16px; }
+.p-24             { padding: 24px; }
+
+.page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.page-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--fm-text);
+  margin: 0 0 20px;
+  font-family: var(--fm-font);
+}
+
+.center-spinner {
+  display: flex;
+  justify-content: center;
+  padding: 80px 0;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 80px 16px;
+  color: var(--fm-text-hint);
+  font-family: var(--fm-font);
+
+  mat-icon { font-size: 64px; width: 64px; height: 64px; opacity: 0.4; }
+  p { font-size: 16px; margin: 16px 0; font-weight: 600; }
+}
+
+// ── Status Chips ──────────────────────────────────────────────
+.status-chip {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: var(--fm-font);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.status-placed       { background: #e3f2fd; color: #1565c0; }
+.status-confirmed    { background: var(--fm-green-100); color: var(--fm-green-800); }
+.status-packed       { background: var(--fm-orange-100); color: var(--fm-orange-700); }
+.status-delivered    { background: var(--fm-green-100); color: var(--fm-green-900); }
+.status-cancelled    { background: #ffebee; color: #b71c1c; }
+.status-open         { background: var(--fm-green-100); color: var(--fm-green-800); }
+.status-closed       { background: #fce4ec; color: #880e4f; }
+.status-procurement  { background: var(--fm-orange-50); color: #f57f17; }
+.status-delivering   { background: #e3f2fd; color: #0d47a1; }
+.status-completed    { background: #f3e5f5; color: #4a148c; }
+.status-pending      { background: var(--fm-orange-50); color: #f57f17; }
+.status-in_progress  { background: #e3f2fd; color: #1565c0; }
+.status-done         { background: var(--fm-green-100); color: var(--fm-green-900); }
+
+// ── Responsive Breakpoints ────────────────────────────────────
+$bp-mobile:  600px;
+$bp-tablet:  960px;
+$bp-desktop: 1280px;

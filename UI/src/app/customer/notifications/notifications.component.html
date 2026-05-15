@@ -1,0 +1,32 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2 class="page-title">Notifications</h2>
+    @if (unreadCount() > 0) {
+      <button mat-stroked-button (click)="markAllRead()">Mark all read</button>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="center-spinner"><mat-spinner diameter="48" /></div>
+  } @else if (notifications().length === 0) {
+    <div class="empty-state">
+      <mat-icon>notifications_none</mat-icon>
+      <p>No notifications yet</p>
+    </div>
+  } @else {
+    <div class="notif-list">
+      @for (n of notifications(); track n.id) {
+        <mat-card class="notif-card" [class.unread]="!n.readStatus" (click)="markRead(n.id)">
+          <mat-card-content>
+            <div class="notif-header">
+              <span class="notif-title">{{ n.title }}</span>
+              @if (!n.readStatus) { <span class="unread-dot"></span> }
+            </div>
+            <div class="notif-body">{{ n.body }}</div>
+            <div class="notif-time">{{ n.sentAt | date:'dd MMM, hh:mm a' }}</div>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,90 @@
+.login-wrapper {
+  display: flex;
+  min-height: 100vh;
+  background:
+    linear-gradient(160deg, #1b5e20 0%, #2e7d32 40%, #558b2f 70%, #e65100 100%);
+  padding: 16px;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+
+  // Subtle texture overlay
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 20% 80%, rgba(255,255,255,0.04) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(255,255,255,0.06) 0%, transparent 50%);
+    pointer-events: none;
+  }
+}
+
+.login-card {
+  background: var(--fm-surface);
+  border-radius: var(--fm-radius-xl);
+  padding: 40px 36px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  position: relative;
+  z-index: 1;
+}
+
+.brand {
+  text-align: center;
+  margin-bottom: 28px;
+
+  .brand-logo {
+    width: 88px;
+    height: 88px;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto 12px;
+    border-radius: var(--fm-radius-md);
+    filter: drop-shadow(0 4px 12px rgba(46, 125, 50, 0.25));
+  }
+
+  h1 {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--fm-primary);
+    font-family: var(--fm-font);
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+
+  p {
+    margin: 0;
+    color: var(--fm-text-secondary);
+    font-size: 13px;
+    font-family: var(--fm-font);
+    font-weight: 500;
+  }
+}
+
+.submit-btn {
+  margin-top: 20px;
+  height: 50px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: var(--fm-font);
+  background: var(--fm-primary) !important;
+  color: white !important;
+  border-radius: var(--fm-radius-md) !important;
+  letter-spacing: 0.3px;
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3) !important;
+  transition: box-shadow 0.2s, transform 0.1s;
+
+  &:hover:not(:disabled) {
+    box-shadow: 0 6px 16px rgba(46, 125, 50, 0.4) !important;
+    transform: translateY(-1px);
+  }
+
+  mat-spinner { display: inline-block; }
+}
+
+.tab-content { padding-top: 20px; }
+.password-hint { font-size: 13px; color: var(--fm-text-hint); margin: 0 0 16px; font-family: var(--fm-font); }
+.full-width { width: 100%; }

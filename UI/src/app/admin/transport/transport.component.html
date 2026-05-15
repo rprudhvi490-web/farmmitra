@@ -1,0 +1,61 @@
+<div class="page-header">
+  <h2 class="page-title">Transport Tracking</h2>
+  <mat-form-field appearance="outline" class="cycle-select">
+    <mat-label>Cycle</mat-label>
+    <mat-select [value]="selectedCycleId()" (selectionChange)="onCycleChange($event.value)">
+      @for (c of cycles(); track c.id) {
+        <mat-option [value]="c.id">{{ c.cycleLabel }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+</div>
+
+<!-- Add Stage Form -->
+<mat-card class="form-card">
+  <mat-card-header><mat-card-title>Add Stage Update</mat-card-title></mat-card-header>
+  <mat-card-content>
+    @if (getAvailableStages().length === 0) {
+      <p style="color:#2e7d32;font-weight:600">✓ All transport stages completed — DISPATCHED</p>
+    } @else {
+      <form [formGroup]="form" class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Next Stage</mat-label>
+          <mat-select formControlName="stage">
+            @for (s of getAvailableStages(); track s.code) {
+              <mat-option [value]="s.code">{{ s.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="notes-field">
+          <mat-label>Notes</mat-label>
+          <input matInput formControlName="notes" placeholder="Optional notes" />
+        </mat-form-field>
+        <button mat-flat-button class="add-btn" (click)="addStage()" [disabled]="saving()">
+          @if (saving()) { <mat-spinner diameter="18" /> } @else { Add Stage }
+        </button>
+      </form>
+    }
+  </mat-card-content>
+</mat-card>
+
+<!-- Stage Timeline -->
+@if (loading()) {
+  <div class="center-spinner"><mat-spinner diameter="48" /></div>
+} @else if (stages().length === 0) {
+  <mat-card class="empty-card">
+    <mat-card-content>No transport stages yet for this cycle.</mat-card-content>
+  </mat-card>
+} @else {
+  <div class="timeline">
+    @for (stage of stages(); track stage.id) {
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+          <div class="stage-label">{{ getStageLabel(stage.stage) }}</div>
+          @if (stage.notes) { <div class="stage-notes">{{ stage.notes }}</div> }
+          <div class="stage-time">{{ stage.createdOn | date:'dd MMM, hh:mm a' }} · {{ stage.updatedBy }}</div>
+        </div>
+      </div>
+    }
+  </div>
+}

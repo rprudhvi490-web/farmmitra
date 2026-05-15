@@ -1,0 +1,77 @@
+<div class="products-page">
+
+  <!-- Search Bar -->
+  <div class="search-bar">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Search products</mat-label>
+      <input matInput [formControl]="searchControl" placeholder="e.g. Tomatoes" />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <!-- Category Filter -->
+  <div class="category-chips">
+    <button mat-stroked-button
+            [class.active-chip]="selectedCategory() === null"
+            (click)="selectCategory(null)">
+      All
+    </button>
+    @for (cat of categories(); track cat.id) {
+      <button mat-stroked-button
+              [class.active-chip]="selectedCategory() === cat.id"
+              (click)="selectCategory(cat.id)">
+        {{ cat.name }}
+      </button>
+    }
+  </div>
+
+  <!-- Products Grid -->
+  @if (loading()) {
+    <div class="center-spinner"><mat-spinner diameter="48" /></div>
+  } @else if (products().length === 0) {
+    <div class="empty-state">
+      <mat-icon>search_off</mat-icon>
+      <p>No products found</p>
+    </div>
+  } @else {
+    <div class="product-grid">
+      @for (product of products(); track product.id) {
+        <mat-card class="product-card">
+          <div class="product-image">
+            @if (product.imageUrl) {
+              <img [src]="product.imageUrl" [alt]="product.name" />
+            } @else {
+              <mat-icon class="placeholder-icon">local_grocery_store</mat-icon>
+            }
+          </div>
+          <mat-card-content>
+            <div class="product-name">{{ product.name }}</div>
+            <div class="product-category">{{ product.categoryName }}</div>
+            <div class="product-price">₹{{ product.pricePerUnit }} / {{ product.unit }}</div>
+            <div class="product-min">Min: {{ product.minOrderQty }} {{ product.unit }}</div>
+          </mat-card-content>
+          <mat-card-actions>
+            <div class="qty-row">
+              <button mat-icon-button class="qty-btn"
+                      (click)="adjustQty(product.id, product.minOrderQty, -product.minOrderQty)">
+                <mat-icon>remove</mat-icon>
+              </button>
+              <span class="qty-value">{{ getQty(product.id) }} {{ product.unit }}</span>
+              <button mat-icon-button class="qty-btn"
+                      (click)="adjustQty(product.id, product.minOrderQty, product.minOrderQty)">
+                <mat-icon>add</mat-icon>
+              </button>
+            </div>
+            <button mat-flat-button class="add-btn"
+                    [class.in-cart]="isInCart(product.id)"
+                    (click)="addToCart(product)">
+              <mat-icon>{{ isInCart(product.id) ? 'check' : 'add_shopping_cart' }}</mat-icon>
+              {{ isInCart(product.id) ? 'Update Cart' : 'Add to Cart' }}
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      }
+    </div>
+  }
+
+</div>

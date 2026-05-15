@@ -1,0 +1,85 @@
+<div class="page-container">
+  <h2 class="page-title">My Profile</h2>
+  @if (!loading()) {
+
+    <!-- Profile Form -->
+    <mat-card class="profile-card">
+      <mat-card-header><mat-card-title>Personal Details</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="form" class="form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Display Name</mat-label>
+            <input matInput formControlName="username" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>First Name</mat-label>
+            <input matInput formControlName="firstName" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Last Name</mat-label>
+            <input matInput formControlName="lastName" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Email</mat-label>
+            <input matInput formControlName="email" type="email" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Flat Number</mat-label>
+            <input matInput formControlName="flatNumber" placeholder="e.g. A-204" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Block</mat-label>
+            <input matInput formControlName="block" placeholder="e.g. Block A" />
+          </mat-form-field>
+        </form>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-flat-button class="save-btn" (click)="save()" [disabled]="saving()">
+          @if (saving()) { <mat-spinner diameter="18" /> } @else { Save Profile }
+        </button>
+      </mat-card-actions>
+    </mat-card>
+
+    <!-- Set Password -->
+    <mat-card class="profile-card">
+      <mat-card-header>
+        <mat-card-title>
+          {{ hasPassword() ? 'Change Password' : 'Set Password' }}
+        </mat-card-title>
+        <mat-card-subtitle>
+          @if (hasPassword()) {
+            You can login with your phone number and password (7-day session).
+          } @else {
+            Set a password to skip OTP on future logins. Gives you a 7-day login session.
+          }
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="passwordForm" class="form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>New Password</mat-label>
+            <input matInput [type]="showPassword() ? 'text' : 'password'"
+                   formControlName="password" />
+            <button mat-icon-button matSuffix type="button"
+                    (click)="showPassword.set(!showPassword())">
+              <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            @if (passwordForm.get('password')?.touched && passwordForm.get('password')?.hasError('minlength')) {
+              <mat-error>Minimum 6 characters</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Confirm Password</mat-label>
+            <input matInput type="password" formControlName="confirmPassword" />
+          </mat-form-field>
+        </form>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-flat-button class="save-btn" (click)="setPassword()" [disabled]="savingPassword()">
+          @if (savingPassword()) { <mat-spinner diameter="18" /> } @else { {{ hasPassword() ? 'Change Password' : 'Set Password' }} }
+        </button>
+      </mat-card-actions>
+    </mat-card>
+
+  }
+</div>

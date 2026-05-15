@@ -1,0 +1,10 @@
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 16px; }
+.page-title { margin: 0; font-size: 22px; }
+.cycle-select { min-width: 280px; }
+.center-spinner { display: flex; justify-content: center; padding: 60px; }
+.empty-card { text-align: center; padding: 32px; color: #757575; }
+.full-width { width: 100%; }
+.status-chip { padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+.status-select { min-width: 120px; font-size: 13px; }
+.pay-btn { color: #1565c0; border-color: #1565c0; font-size: 12px; }
+.paid-label { color: #2e7d32; font-weight: 600; font-size: 13px; }

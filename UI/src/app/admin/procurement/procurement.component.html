@@ -1,0 +1,87 @@
+<div class="page-header">
+  <h2 class="page-title">Procurement Sheet</h2>
+  <div class="header-actions">
+    <mat-form-field appearance="outline" class="cycle-select">
+      <mat-label>Cycle</mat-label>
+      <mat-select [value]="selectedCycleId()" (selectionChange)="onCycleChange($event.value)">
+        @for (c of cycles(); track c.id) {
+          <mat-option [value]="c.id">{{ c.cycleLabel }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <button mat-flat-button class="export-btn" (click)="exportExcel()" [disabled]="exporting() || !sheet()">
+      @if (exporting()) { <mat-spinner diameter="18" /> } @else { <ng-container><mat-icon>download</mat-icon> Export Excel</ng-container> }
+    </button>
+  </div>
+</div>
+
+@if (loading()) {
+  <div class="center-spinner"><mat-spinner diameter="48" /></div>
+} @else if (!sheet() || sheet()!.items.length === 0) {
+  <mat-card class="empty-card">
+    <mat-card-content>No procurement data. Close a cycle to generate the sheet.</mat-card-content>
+  </mat-card>
+} @else {
+  <div class="summary-row">
+    <span>{{ sheet()!.cycleLabel }}</span>
+    <span>{{ sheet()!.totalOrders }} orders</span>
+  </div>
+
+  <mat-card>
+    <table mat-table [dataSource]="sheet()!.items" class="full-width">
+
+      <ng-container matColumnDef="product">
+        <th mat-header-cell *matHeaderCellDef>Product</th>
+        <td mat-cell *matCellDef="let item">{{ item.productName }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="unit">
+        <th mat-header-cell *matHeaderCellDef>Unit</th>
+        <td mat-cell *matCellDef="let item">{{ item.unit }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="totalQty">
+        <th mat-header-cell *matHeaderCellDef>Needed</th>
+        <td mat-cell *matCellDef="let item"><strong>{{ item.totalQuantity }}</strong></td>
+      </ng-container>
+
+      <ng-container matColumnDef="vendor">
+        <th mat-header-cell *matHeaderCellDef>Vendor</th>
+        <td mat-cell *matCellDef="let item">
+          <input class="inline-input" [(ngModel)]="editValues[item.productId].vendorName"
+                 placeholder="Vendor name" />
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="procuredQty">
+        <th mat-header-cell *matHeaderCellDef>Procured Qty</th>
+        <td mat-cell *matCellDef="let item">
+          <input class="inline-input qty-input" type="number"
+                 [(ngModel)]="editValues[item.productId].procuredQty" />
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let item">
+          <mat-select [(value)]="editValues[item.productId].status" class="status-select">
+            <mat-option value="PENDING">PENDING</mat-option>
+            <mat-option value="PROCURED">PROCURED</mat-option>
+          </mat-select>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let item">
+          <button mat-icon-button class="save-btn" (click)="save(item)">
+            <mat-icon>save</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="columns"></tr>
+      <tr mat-row *matRowDef="let row; columns: columns;"></tr>
+    </table>
+  </mat-card>
+}

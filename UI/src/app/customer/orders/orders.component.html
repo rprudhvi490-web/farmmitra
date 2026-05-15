@@ -1,0 +1,41 @@
+<div class="page-container">
+  <h2 class="page-title">My Orders</h2>
+
+  @if (loading()) {
+    <div class="center-spinner"><mat-spinner diameter="48" /></div>
+  } @else if (orders().length === 0) {
+    <div class="empty-state">
+      <mat-icon>receipt_long</mat-icon>
+      <p>No orders yet</p>
+      <a mat-flat-button class="shop-btn" routerLink="/customer/products">Start Shopping</a>
+    </div>
+  } @else {
+    <div class="orders-list">
+      @for (order of orders(); track order.id) {
+        <mat-card class="order-card">
+          <mat-card-content>
+            <div class="order-header">
+              <div>
+                <div class="order-number">{{ order.orderNumber }}</div>
+                <div class="order-date">{{ order.createdOn | date:'dd MMM yyyy, hh:mm a' }}</div>
+              </div>
+              <span class="status-chip {{ getStatusClass(order.status) }}">{{ order.status }}</span>
+            </div>
+            <div class="order-footer">
+              <span class="order-total">₹{{ order.totalAmount }}</span>
+              @if (order.deliverySlot) {
+                <span class="delivery-slot">
+                  <mat-icon>event</mat-icon>
+                  {{ order.deliverySlot === 'SAT' ? 'Saturday' : 'Sunday' }}
+                </span>
+              }
+              <a mat-stroked-button [routerLink]="['/customer/orders', order.id]" class="view-btn">
+                View Details
+              </a>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  }
+</div>

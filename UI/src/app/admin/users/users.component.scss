@@ -1,0 +1,16 @@
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 16px; }
+.page-title { margin: 0; font-size: 22px; }
+.search-field { min-width: 280px; }
+.center-spinner { display: flex; justify-content: center; padding: 60px; }
+.full-width { width: 100%; }
+
+.role-chips { display: flex; gap: 4px; flex-wrap: wrap; }
+.role-chip { background: #e8f5e9; color: #2e7d32; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+
+.status-active  { color: #2e7d32; font-weight: 600; font-size: 13px; }
+.status-blocked { color: #c62828; font-weight: 600; font-size: 13px; }
+
+.action-row { display: flex; align-items: center; gap: 8px; }
+.block-btn   { color: #c62828; border-color: #c62828; font-size: 12px; }
+.unblock-btn { color: #2e7d32; border-color: #2e7d32; font-size: 12px; }
+.role-select { min-width: 130px; font-size: 13px; }

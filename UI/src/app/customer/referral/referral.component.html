@@ -1,0 +1,39 @@
+<div class="page-container">
+  <h2 class="page-title">Referral</h2>
+
+  <!-- Referral Code Card -->
+  <mat-card class="code-card">
+    <mat-card-content>
+      <div class="code-label">Your Referral Code</div>
+      <div class="code-value">{{ referralCode() }}</div>
+      <p class="code-desc">Share this code with friends. When they place their first order, you get ₹100 off your next order!</p>
+      <button mat-flat-button class="copy-btn" (click)="copyCode()">
+        <mat-icon>content_copy</mat-icon> Copy Code
+      </button>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Referral History -->
+  <h3 class="section-title">Referral History</h3>
+  @if (loading()) {
+    <div class="center-spinner"><mat-spinner diameter="36" /></div>
+  } @else if (history().length === 0) {
+    <mat-card class="empty-card">
+      <mat-card-content>No referrals yet. Share your code to earn ₹100 discounts!</mat-card-content>
+    </mat-card>
+  } @else {
+    @for (r of history(); track r.id) {
+      <mat-card class="history-card">
+        <mat-card-content>
+          <div class="history-row">
+            <span>{{ r.referredPhone }}</span>
+            <span class="history-status" [class.rewarded]="r.status === 'REWARDED'">
+              {{ r.status }}
+            </span>
+            <span class="history-date">{{ r.createdOn | date:'dd MMM yyyy' }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+  }
+</div>

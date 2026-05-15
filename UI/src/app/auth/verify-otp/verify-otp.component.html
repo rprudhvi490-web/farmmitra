@@ -1,0 +1,55 @@
+<div class="verify-wrapper">
+  <div class="verify-card">
+
+    <div class="brand">
+      <span class="brand-icon">🔐</span>
+      <h1>Verify OTP</h1>
+      <p>Enter the 6-digit code sent to</p>
+      <strong>+91 {{ phone() }}</strong>
+    </div>
+
+    <div class="otp-row" (paste)="onPaste($event)">
+      @for (ctrl of digits.controls; track $index) {
+        <input
+          #otpBox
+          class="otp-box"
+          type="tel"
+          inputmode="numeric"
+          maxlength="1"
+          [value]="ctrl.value"
+          (keyup)="onDigitInput($event, $index)"
+          (keydown)="onDigitKeydown($event, $index)"
+          [disabled]="loading()"
+        />
+      }
+    </div>
+
+    <button
+      mat-flat-button
+      class="full-width submit-btn"
+      [disabled]="loading()"
+      (click)="verify()"
+    >
+      @if (loading()) {
+        <mat-spinner diameter="20" />
+      } @else {
+        Verify OTP
+      }
+    </button>
+
+    <div class="resend-row">
+      @if (resendCooldown() > 0) {
+        <span class="cooldown">Resend OTP in {{ resendCooldown() }}s</span>
+      } @else {
+        <button mat-button class="resend-btn" (click)="resendOtp()">
+          Resend OTP
+        </button>
+      }
+    </div>
+
+    <button mat-button class="back-btn" routerLink="/auth/login">
+      ← Change number
+    </button>
+
+  </div>
+</div>

@@ -1,0 +1,66 @@
+<div class="page-container">
+
+  @if (loading()) {
+    <div class="center-spinner">
+      <mat-spinner diameter="48" />
+    </div>
+  } @else {
+
+    <!-- Cycle Status Card -->
+    @if (cycle(); as c) {
+      <mat-card class="cycle-card">
+        <mat-card-content>
+          <div class="cycle-header">
+            <mat-icon [style.color]="getStatusConfig(c.status).color">
+              {{ getStatusConfig(c.status).icon }}
+            </mat-icon>
+            <div>
+              <div class="cycle-label">{{ c.cycleLabel }}</div>
+              <div class="cycle-message">{{ getStatusConfig(c.status).message }}</div>
+            </div>
+          </div>
+
+          @if (c.status === 'OPEN' && countdown()) {
+            <div class="countdown-row">
+              <span class="countdown-label">Closes in</span>
+              <span class="countdown-value">{{ countdown() }}</span>
+            </div>
+          }
+
+          @if (c.status === 'OPEN') {
+            <a mat-flat-button class="shop-btn" routerLink="/customer/products">
+              <mat-icon>storefront</mat-icon>
+              Shop Now
+            </a>
+          }
+        </mat-card-content>
+      </mat-card>
+    } @else {
+      <mat-card class="cycle-card">
+        <mat-card-content>
+          <div class="cycle-header">
+            <mat-icon style="color:#757575">schedule</mat-icon>
+            <div>
+              <div class="cycle-label">No active cycle</div>
+              <div class="cycle-message">Next ordering window opens Monday at midnight.</div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <!-- Quick Links -->
+    <div class="quick-links">
+      <a mat-stroked-button routerLink="/customer/orders">
+        <mat-icon>receipt_long</mat-icon> My Orders
+      </a>
+      <a mat-stroked-button routerLink="/customer/profile">
+        <mat-icon>person</mat-icon> My Profile
+      </a>
+      <a mat-stroked-button routerLink="/customer/referral">
+        <mat-icon>card_giftcard</mat-icon> Referral
+      </a>
+    </div>
+
+  }
+</div>

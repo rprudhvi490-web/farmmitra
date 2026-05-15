@@ -1,0 +1,92 @@
+<div class="page-header">
+  <h2 class="page-title">Notifications</h2>
+</div>
+
+<mat-tab-group>
+
+  <!-- Broadcast Tab -->
+  <mat-tab label="Broadcast to All">
+    <div class="tab-content">
+      <mat-card>
+        <mat-card-content>
+          <p class="hint">Send a notification to all users in the community.</p>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Title</mat-label>
+            <input matInput [(ngModel)]="broadcast.title" placeholder="e.g. This week's ordering is now open!" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Message</mat-label>
+            <textarea matInput [(ngModel)]="broadcast.body" rows="3"
+                      placeholder="e.g. Order by Wednesday 2 PM. Fresh vegetables from Kadapa."></textarea>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Type</mat-label>
+            <mat-select [(value)]="broadcast.type">
+              @for (t of notificationTypes; track t) {
+                <mat-option [value]="t">{{ t }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <div class="actions">
+            <button mat-flat-button color="primary"
+                    [disabled]="broadcastSending() || !broadcast.title || !broadcast.body"
+                    (click)="sendBroadcast()">
+              <mat-icon>campaign</mat-icon>
+              {{ broadcastSending() ? 'Sending...' : 'Send Broadcast' }}
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </mat-tab>
+
+  <!-- Direct Tab -->
+  <mat-tab label="Send to User">
+    <div class="tab-content">
+      <mat-card>
+        <mat-card-content>
+          <p class="hint">Send a notification to a specific user by their User ID.</p>
+
+          <mat-form-field appearance="outline">
+            <mat-label>User ID</mat-label>
+            <input matInput type="number" [(ngModel)]="direct.userId" placeholder="e.g. 42" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Title</mat-label>
+            <input matInput [(ngModel)]="direct.title" placeholder="e.g. Your order is confirmed" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Message</mat-label>
+            <textarea matInput [(ngModel)]="direct.body" rows="3"
+                      placeholder="e.g. Order #FM-2026-0001 has been confirmed."></textarea>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Type</mat-label>
+            <mat-select [(value)]="direct.type">
+              @for (t of notificationTypes; track t) {
+                <mat-option [value]="t">{{ t }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <div class="actions">
+            <button mat-flat-button color="primary"
+                    [disabled]="directSending() || !direct.userId || !direct.title || !direct.body"
+                    (click)="sendDirect()">
+              <mat-icon>send</mat-icon>
+              {{ directSending() ? 'Sending...' : 'Send Notification' }}
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </mat-tab>
+
+</mat-tab-group>

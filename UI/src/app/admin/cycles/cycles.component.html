@@ -1,0 +1,111 @@
+<div class="page-header">
+  <h2 class="page-title">Weekly Cycles</h2>
+  <button mat-flat-button class="create-btn" (click)="showCreateForm.set(!showCreateForm())">
+    <mat-icon>add</mat-icon> New Cycle
+  </button>
+</div>
+
+<!-- Create Form -->
+@if (showCreateForm()) {
+  <mat-card class="create-card">
+    <mat-card-header><mat-card-title>Create New Cycle</mat-card-title></mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="createForm" class="create-form">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Cycle Label</mat-label>
+          <input matInput formControlName="cycleLabel" placeholder="e.g. Week of 19 May 2025" />
+        </mat-form-field>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Order Opens At</mat-label>
+            <input matInput type="datetime-local" formControlName="orderOpenAt" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Order Closes At</mat-label>
+            <input matInput type="datetime-local" formControlName="orderCloseAt" />
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Saturday Delivery</mat-label>
+            <input matInput type="date" formControlName="deliveryDateSat" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Sunday Delivery</mat-label>
+            <input matInput type="date" formControlName="deliveryDateSun" />
+          </mat-form-field>
+        </div>
+      </form>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-flat-button class="create-btn" (click)="create()" [disabled]="saving()">
+        @if (saving()) { <mat-spinner diameter="18" /> } @else { Create }
+      </button>
+      <button mat-button (click)="showCreateForm.set(false)">Cancel</button>
+    </mat-card-actions>
+  </mat-card>
+}
+
+<!-- Cycles Table -->
+@if (loading()) {
+  <div class="center-spinner"><mat-spinner diameter="48" /></div>
+} @else if (cycles().length === 0) {
+  <mat-card class="empty-card">
+    <mat-card-content>No cycles yet. Create your first cycle above.</mat-card-content>
+  </mat-card>
+} @else {
+  <mat-card>
+    <table mat-table [dataSource]="cycles()" class="full-width">
+
+      <ng-container matColumnDef="cycleLabel">
+        <th mat-header-cell *matHeaderCellDef>Cycle</th>
+        <td mat-cell *matCellDef="let c">{{ c.cycleLabel }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let c">
+          <span class="status-chip {{ getStatusClass(c.status) }}">{{ c.status }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="orderOpenAt">
+        <th mat-header-cell *matHeaderCellDef>Opens</th>
+        <td mat-cell *matCellDef="let c">{{ c.orderOpenAt | date:'dd MMM, HH:mm' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="orderCloseAt">
+        <th mat-header-cell *matHeaderCellDef>Closes</th>
+        <td mat-cell *matCellDef="let c">{{ c.orderCloseAt | date:'dd MMM, HH:mm' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let c">
+          <div class="action-btns">
+            @if (c.status === 'CLOSED') {
+              <button mat-stroked-button class="open-btn" (click)="open(c.id)">Re-Open</button>
+            }
+            @if (c.status === 'OPEN') {
+              <button mat-stroked-button class="close-btn" (click)="close(c.id)">Close</button>
+            }
+            @if (c.status === 'CLOSED') {
+              <button mat-stroked-button (click)="updateStatus(c.id, 'PROCUREMENT')">→ Procurement</button>
+            }
+            @if (c.status === 'PROCUREMENT') {
+              <button mat-stroked-button (click)="updateStatus(c.id, 'DELIVERING')">→ Delivering</button>
+            }
+            @if (c.status === 'DELIVERING') {
+              <button mat-stroked-button (click)="updateStatus(c.id, 'COMPLETED')">→ Complete</button>
+            }
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="columns"></tr>
+      <tr mat-row *matRowDef="let row; columns: columns;"></tr>
+    </table>
+  </mat-card>
+}
