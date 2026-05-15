@@ -2,4 +2,4 @@
 -- Adds has_password flag to app_user
 -- Existing users default to false — they must use OTP until they set a password
 
-ALTER TABLE app_user ADD COLUMN has_password BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE app_user ADD COLUMN IF NOT EXISTS has_password BOOLEAN NOT NULL DEFAULT FALSE;
