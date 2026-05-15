@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiBaseUrl: 'https://<your-render-url>/weekendbasket/api'
+  apiBaseUrl: 'https://farmmitra-backend.onrender.com/weekendbasket/api'
 };
