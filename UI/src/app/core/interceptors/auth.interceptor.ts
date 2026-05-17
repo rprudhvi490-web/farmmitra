@@ -3,7 +3,7 @@ import { inject } from '@angular/core';
 import { TokenService } from '../services/token.service';
 
 // Public endpoints that must NOT have Authorization header
-const PUBLIC_URLS = ['/auth/send-otp', '/auth/verify-otp', '/health'];
+const PUBLIC_URLS = ['/auth/send-otp', '/auth/verify-otp', '/health', 'cloudinary.com'];
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const tokenService = inject(TokenService);
