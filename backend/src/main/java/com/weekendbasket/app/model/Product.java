@@ -43,4 +43,8 @@ public class Product extends BaseEntity {
 
     @Column(name = "min_order_qty", precision = 6, scale = 2)
     private BigDecimal minOrderQty;
+
+    @Column(name = "rating", precision = 2, scale = 1)
+    @Builder.Default
+    private BigDecimal rating = BigDecimal.ZERO;
 }

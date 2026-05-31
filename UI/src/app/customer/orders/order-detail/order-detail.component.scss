@@ -51,6 +51,14 @@
   font-family: var(--fm-font);
 }
 
+.reorder-btn {
+  color: var(--fm-accent);
+  border-color: var(--fm-accent);
+  font-weight: 700;
+  font-family: var(--fm-font);
+  margin-left: auto;
+}
+
 // Transport timeline
 .timeline { padding: 8px 0; }
 

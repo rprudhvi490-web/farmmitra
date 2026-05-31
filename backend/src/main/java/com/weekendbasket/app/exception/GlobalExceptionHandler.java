@@ -1,6 +1,7 @@
 package com.weekendbasket.app.exception;
 
 import com.weekendbasket.app.dto.ErrorResponse;
+import jakarta.persistence.OptimisticLockException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;

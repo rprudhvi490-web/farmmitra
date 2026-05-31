@@ -12,6 +12,11 @@
     <button mat-flat-button class="export-btn" (click)="exportExcel()" [disabled]="exporting() || !sheet()">
       @if (exporting()) { <mat-spinner diameter="18" /> } @else { <ng-container><mat-icon>download</mat-icon> Export Excel</ng-container> }
     </button>
+    <button mat-flat-button class="mark-all-btn"
+            (click)="markAllProcured()"
+            [disabled]="markingAll() || !sheet() || sheet()!.items.length === 0">
+      @if (markingAll()) { <mat-spinner diameter="18" /> } @else { <mat-icon>done_all</mat-icon> Mark All Procured }
+    </button>
   </div>
 </div>
 

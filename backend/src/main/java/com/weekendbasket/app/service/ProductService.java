@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -56,6 +57,7 @@ public class ProductService {
                 .pricePerUnit(request.pricePerUnit())
                 .imageUrl(request.imageUrl())
                 .minOrderQty(request.minOrderQty())
+                .rating(request.rating() != null ? request.rating() : BigDecimal.ZERO)
                 .build();
         productRepository.save(product);
         return toResponse(product);
@@ -73,6 +75,7 @@ public class ProductService {
         product.setPricePerUnit(request.pricePerUnit());
         product.setImageUrl(request.imageUrl());
         product.setMinOrderQty(request.minOrderQty());
+        if (request.rating() != null) product.setRating(request.rating());
         productRepository.save(product);
         return toResponse(product);
     }
@@ -94,7 +97,7 @@ public class ProductService {
                 p.getId(), p.getName(), p.getDescription(),
                 p.getCategory().getId(), p.getCategory().getName(),
                 p.getUnit(), p.getPricePerUnit(), p.getImageUrl(),
-                p.getAvailable(), p.getMinOrderQty()
+                p.getAvailable(), p.getMinOrderQty(), p.getRating()
         );
     }
 }

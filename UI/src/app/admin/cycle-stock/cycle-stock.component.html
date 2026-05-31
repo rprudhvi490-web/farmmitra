@@ -1,0 +1,94 @@
+<div class="page-header">
+  <h2 class="page-title">Cycle Stock Limits</h2>
+  <div class="header-actions">
+    <button mat-stroked-button class="suggest-btn"
+            (click)="applySuggestionsToAll()"
+            matTooltip="Pre-fill all products with last cycle's max stock">
+      <mat-icon>auto_fix_high</mat-icon> Apply Suggestions
+    </button>
+    <button mat-flat-button class="save-btn" (click)="saveAll()" [disabled]="saving()">
+      @if (saving()) { <mat-spinner diameter="18" /> } @else { <mat-icon>save</mat-icon> Save All }
+    </button>
+  </div>
+</div>
+
+<!-- Cycle selector -->
+<mat-card class="selector-card">
+  <mat-form-field appearance="outline" class="cycle-select">
+    <mat-label>Select Cycle</mat-label>
+    <mat-select [value]="selectedCycleId()" (selectionChange)="onCycleChange($event.value)">
+      @for (c of cycles(); track c.id) {
+        <mat-option [value]="c.id">{{ c.cycleLabel }} — {{ c.status }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+  <p class="hint">
+    <mat-icon class="hint-icon">info</mat-icon>
+    Set max procurement quantity per product before the cycle opens. Products without a limit will be blocked at checkout.
+  </p>
+</mat-card>
+
+@if (loading()) {
+  <div class="center-spinner"><mat-spinner diameter="48" /></div>
+} @else {
+  <mat-card>
+    <table mat-table [dataSource]="displayRows" class="full-width">
+
+      <ng-container matColumnDef="product">
+        <th mat-header-cell *matHeaderCellDef>Product</th>
+        <td mat-cell *matCellDef="let r">
+          {{ r.productName }}
+          @if (r.unsaved) { <span class="unsaved-badge">not set</span> }
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="unit">
+        <th mat-header-cell *matHeaderCellDef>Unit</th>
+        <td mat-cell *matCellDef="let r">{{ r.unit }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="maxStock">
+        <th mat-header-cell *matHeaderCellDef>Max Stock</th>
+        <td mat-cell *matCellDef="let r">
+          <mat-form-field appearance="outline" class="qty-field">
+            <input matInput type="number" min="0"
+                   [(ngModel)]="editValues[r.productId]"
+                   placeholder="e.g. 50" />
+          </mat-form-field>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="orderedQty">
+        <th mat-header-cell *matHeaderCellDef>Ordered</th>
+        <td mat-cell *matCellDef="let r">{{ r.orderedQty ?? 0 }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="remainingQty">
+        <th mat-header-cell *matHeaderCellDef>Remaining</th>
+        <td mat-cell *matCellDef="let r">
+          @if (r.remainingQty !== null && r.remainingQty !== undefined) {
+            <span [class.low-stock]="r.remainingQty <= r.maxStock * 0.2">
+              {{ r.remainingQty }}
+            </span>
+          } @else { — }
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="soldOut">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let r">
+          @if (r.soldOut) {
+            <span class="chip sold-out">Sold Out</span>
+          } @else if (r.maxStock) {
+            <span class="chip available">Available</span>
+          } @else {
+            <span class="chip not-set">Not Set</span>
+          }
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="columns"></tr>
+      <tr mat-row *matRowDef="let row; columns: columns;"></tr>
+    </table>
+  </mat-card>
+}

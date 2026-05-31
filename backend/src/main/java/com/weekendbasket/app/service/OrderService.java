@@ -38,6 +38,7 @@ public class OrderService {
     private final DiscountStrategy discountStrategy;
     private final List<OrderPlacementRule> placementRules;
     private final ApplicationEventPublisher eventPublisher;
+    private final CycleProductService cycleProductService;
 
     @Transactional
     public OrderResponse placeOrder(String phoneNumber, PlaceOrderRequest request) {
@@ -111,7 +112,11 @@ public class OrderService {
         stateTransitionWorker.apply("ORDER", order.getStatus(), "CANCELLED", "CUSTOMER_CANCEL");
         order.setStatus("CANCELLED");
         orderRepository.save(order);
-        return toResponse(order, orderItemRepository.findByOrderId(orderId));
+        // Release reserved stock back to cycle
+        List<OrderItem> items = orderItemRepository.findByOrderId(orderId);
+        items.forEach(i -> cycleProductService.releaseStock(
+                order.getCycle().getId(), i.getProduct().getId(), i.getQuantity()));
+        return toResponse(order, items);
     }
 
     // Admin — paginated

@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, HostListener } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -33,11 +33,25 @@ export class AdminLayoutComponent {
   tokenService = inject(TokenService);
 
   sidenavOpen = signal(true);
+  isMobile = signal(window.innerWidth < 960);
+
+  get sidenavMode(): 'side' | 'over' {
+    return this.isMobile() ? 'over' : 'side';
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    const mobile = window.innerWidth < 960;
+    this.isMobile.set(mobile);
+    if (mobile) this.sidenavOpen.set(false);
+    else this.sidenavOpen.set(true);
+  }
 
   navItems: NavItem[] = [
-    { label: 'Dashboard',   icon: 'dashboard',      route: '/admin/dashboard' },
-    { label: 'Cycles',      icon: 'event_repeat',   route: '/admin/cycles' },
-    { label: 'Products',    icon: 'inventory_2',    route: '/admin/products' },
+    { label: 'Dashboard',    icon: 'dashboard',       route: '/admin/dashboard' },
+    { label: 'Cycles',       icon: 'event_repeat',    route: '/admin/cycles' },
+    { label: 'Stock Limits', icon: 'inventory',       route: '/admin/cycle-stock' },
+    { label: 'Products',     icon: 'inventory_2',     route: '/admin/products' },
     { label: 'Categories',  icon: 'category',       route: '/admin/categories' },
     { label: 'Orders',      icon: 'receipt_long',   route: '/admin/orders' },
     { label: 'Procurement', icon: 'agriculture',    route: '/admin/procurement' },

@@ -24,6 +24,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
 
   .order-total {
     font-size: 20px;
@@ -51,5 +52,12 @@
     font-weight: 700;
     font-family: var(--fm-font);
     border-radius: var(--fm-radius-sm) !important;
+  }
+
+  .reorder-btn { color: var(--fm-accent); }
+
+  @media (max-width: 480px) {
+    .order-total { font-size: 18px; }
+    .view-btn { flex: 1; justify-content: center; }
   }
 }

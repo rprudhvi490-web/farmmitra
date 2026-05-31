@@ -7,7 +7,7 @@
     <div class="empty-state">
       <mat-icon>receipt_long</mat-icon>
       <p>No orders yet</p>
-      <a mat-flat-button class="shop-btn" routerLink="/customer/products">Start Shopping</a>
+      <a mat-flat-button class="shop-btn" routerLink="/customer/home">Start Shopping</a>
     </div>
   } @else {
     <div class="orders-list">
@@ -29,8 +29,11 @@
                   {{ order.deliverySlot === 'SAT' ? 'Saturday' : 'Sunday' }}
                 </span>
               }
+              <button mat-icon-button class="reorder-btn" (click)="reorder(order)" matTooltip="Reorder">
+                <mat-icon>replay</mat-icon>
+              </button>
               <a mat-stroked-button [routerLink]="['/customer/orders', order.id]" class="view-btn">
-                View Details
+                View
               </a>
             </div>
           </mat-card-content>

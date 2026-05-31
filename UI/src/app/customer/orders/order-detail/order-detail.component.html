@@ -8,6 +8,9 @@
     <div class="order-header">
       <h2>{{ o.orderNumber }}</h2>
       <span class="status-chip {{ getStatusClass(o.status) }}">{{ o.status }}</span>
+      <button mat-stroked-button class="reorder-btn" (click)="reorder()">
+        <mat-icon>replay</mat-icon> Reorder
+      </button>
     </div>
 
     <!-- Items -->

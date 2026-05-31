@@ -1,5 +1,5 @@
 import { Component, inject, signal, Input, OnInit, DestroyRef } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { OrderService, CustomerOrder } from '../../services/customer.services';
+import { CartService } from '../../services/cart.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 
@@ -39,8 +40,10 @@ export class OrderDetailComponent implements OnInit {
   @Input() id!: string;
 
   private orderService = inject(OrderService);
+  private cartService = inject(CartService);
   private http = inject(HttpClient);
   private snackbar = inject(MatSnackBar);
+  private router = inject(Router);
   private destroyRef = inject(DestroyRef);
   private base = environment.apiBaseUrl;
 
@@ -56,7 +59,6 @@ export class OrderDetailComponent implements OnInit {
         next: o => {
           this.order.set(o);
           this.loading.set(false);
-          // Load transport stages for this order's cycle
           if (o.cycleId) {
             this.http.get<TransportStage[]>(`${this.base}/transport/${o.cycleId}`)
               .pipe(takeUntilDestroyed(this.destroyRef))
@@ -65,6 +67,24 @@ export class OrderDetailComponent implements OnInit {
         },
         error: () => this.loading.set(false)
       });
+  }
+
+  reorder(): void {
+    const o = this.order();
+    if (!o) return;
+    o.items.forEach(item => {
+      this.cartService.addOrUpdate({
+        productId: item.productId,
+        productName: item.productName,
+        unit: item.unit,
+        pricePerUnit: item.unitPrice,
+        quantity: item.quantity,
+        minOrderQty: item.quantity
+      });
+    });
+    this.snackbar.open(`${o.items.length} item(s) added to cart`, 'View Cart', { duration: 3000 })
+      .onAction().subscribe(() => this.router.navigate(['/customer/cart']));
+    this.router.navigate(['/customer/home']);
   }
 
   getStageLabel(stage: string): string {

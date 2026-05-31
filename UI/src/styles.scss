@@ -216,3 +216,47 @@ button.mat-mdc-flat-button[color="primary"] {
 $bp-mobile:  600px;
 $bp-tablet:  960px;
 $bp-desktop: 1280px;
+
+// ── Mobile Responsive Utilities ──────────────────────────────
+
+// All admin/customer tables get horizontal scroll on mobile
+.mat-mdc-card {
+  @media (max-width: 600px) {
+    overflow-x: auto;
+  }
+}
+
+table.mat-mdc-table {
+  @media (max-width: 600px) {
+    min-width: 560px;
+  }
+}
+
+// Page headers stack on mobile
+.page-header {
+  @media (max-width: 600px) {
+    flex-direction: column;
+    align-items: flex-start !important;
+
+    .header-actions,
+    button, a {
+      width: 100%;
+    }
+  }
+}
+
+// page-container padding tighter on mobile
+.page-container {
+  @media (max-width: 600px) {
+    padding: 12px;
+  }
+}
+
+// Admin form fields full width on mobile
+@media (max-width: 600px) {
+  .cycle-select,
+  .mat-mdc-form-field.cycle-select {
+    min-width: unset !important;
+    width: 100% !important;
+  }
+}

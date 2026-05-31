@@ -8,6 +8,7 @@ export const ADMIN_ROUTES: Routes = [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard',   loadComponent: () => import('./dashboard/dashboard.component').then(m => m.DashboardComponent) },
       { path: 'cycles',      loadComponent: () => import('./cycles/cycles.component').then(m => m.CyclesComponent) },
+      { path: 'cycle-stock',  loadComponent: () => import('./cycle-stock/cycle-stock.component').then(m => m.CycleStockComponent) },
       { path: 'products',    loadComponent: () => import('./products/products.component').then(m => m.AdminProductsComponent) },
       { path: 'categories',  loadComponent: () => import('./categories/categories.component').then(m => m.CategoriesComponent) },
       { path: 'orders',      loadComponent: () => import('./orders/orders.component').then(m => m.AdminOrdersComponent) },

@@ -218,6 +218,10 @@ export class ProcurementService {
     return this.http.put(`${this.base}/procurement/items/${productId}`, req);
   }
 
+  markAllProcured(cycleId: number): Observable<any> {
+    return this.http.put(`${this.base}/procurement/${cycleId}/mark-all-procured`, {});
+  }
+
   export(cycleId: number): Observable<Blob> {
     return this.http.get(`${this.base}/procurement/${cycleId}/export`, { responseType: 'blob' });
   }
@@ -250,6 +254,47 @@ export class NotificationAdminService {
 
   sendToUser(req: { userId: number | null; title: string; body: string; type: string }): Observable<any> {
     return this.http.post(`${this.base}/notifications/send`, req);
+  }
+}
+
+// ── Cycle Product Service ────────────────────────────────────
+export interface CycleProductResponse {
+  id: number;
+  productId: number;
+  productName: string;
+  unit: string;
+  maxStock: number;
+  orderedQty: number;
+  remainingQty: number;
+  soldOut: boolean;
+}
+
+export interface StockSuggestion {
+  productId: number;
+  productName: string;
+  unit: string;
+  suggestedMaxStock: number | null;
+}
+
+export interface BulkSetStockRequest {
+  items: { productId: number; maxStock: number }[];
+}
+
+@Injectable({ providedIn: 'root' })
+export class CycleProductAdminService {
+  private http = inject(HttpClient);
+  private base = environment.apiBaseUrl;
+
+  getForCycle(cycleId: number): Observable<CycleProductResponse[]> {
+    return this.http.get<CycleProductResponse[]>(`${this.base}/cycle-products/${cycleId}`);
+  }
+
+  getSuggestions(): Observable<StockSuggestion[]> {
+    return this.http.get<StockSuggestion[]>(`${this.base}/cycle-products/suggestions`);
+  }
+
+  bulkSetStock(cycleId: number, req: BulkSetStockRequest): Observable<CycleProductResponse[]> {
+    return this.http.put<CycleProductResponse[]>(`${this.base}/cycle-products/${cycleId}`, req);
   }
 }
 

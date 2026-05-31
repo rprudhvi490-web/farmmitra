@@ -19,7 +19,8 @@ public class ProductDto {
             @Positive(message = "Price must be positive")
             BigDecimal pricePerUnit,
             String imageUrl,
-            BigDecimal minOrderQty
+            BigDecimal minOrderQty,
+            BigDecimal rating
     ) {}
 
     public record ProductResponse(
@@ -32,6 +33,7 @@ public class ProductDto {
             BigDecimal pricePerUnit,
             String imageUrl,
             Boolean available,
-            BigDecimal minOrderQty
+            BigDecimal minOrderQty,
+            BigDecimal rating
     ) {}
 }

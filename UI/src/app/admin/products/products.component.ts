@@ -27,6 +27,7 @@ export interface Product {
   imageUrl: string;
   available: boolean;
   minOrderQty: number;
+  rating: number;
 }
 
 @Component({
@@ -56,7 +57,7 @@ export class AdminProductsComponent implements OnInit {
   showForm = signal(false);
   editingId = signal<number | null>(null);
 
-  columns = ['image', 'name', 'category', 'price', 'unit', 'available', 'actions'];
+  columns = ['image', 'name', 'category', 'price', 'unit', 'rating', 'available', 'actions'];
 
   form = new FormGroup({
     name:         new FormControl('', Validators.required),
@@ -67,6 +68,7 @@ export class AdminProductsComponent implements OnInit {
     minOrderQty:  new FormControl<number>(0.5, Validators.required),
     imageUrl:     new FormControl(''),
     available:    new FormControl(true),
+    rating:       new FormControl<number>(0),
   });
 
   ngOnInit(): void {
@@ -83,13 +85,13 @@ export class AdminProductsComponent implements OnInit {
 
   openCreate(): void {
     this.editingId.set(null);
-    this.form.reset({ name: '', description: '', categoryId: null, unit: 'kg', pricePerUnit: 0, minOrderQty: 0.5, imageUrl: '', available: true });
+    this.form.reset({ name: '', description: '', categoryId: null, unit: 'kg', pricePerUnit: 0, minOrderQty: 0.5, imageUrl: '', available: true, rating: 0 });
     this.showForm.set(true);
   }
 
   openEdit(p: Product): void {
     this.editingId.set(p.id);
-    this.form.setValue({ name: p.name, description: p.description ?? '', categoryId: p.categoryId, unit: p.unit, pricePerUnit: p.pricePerUnit, minOrderQty: p.minOrderQty, imageUrl: p.imageUrl ?? '', available: p.available });
+    this.form.setValue({ name: p.name, description: p.description ?? '', categoryId: p.categoryId, unit: p.unit, pricePerUnit: p.pricePerUnit, minOrderQty: p.minOrderQty, imageUrl: p.imageUrl ?? '', available: p.available, rating: p.rating ?? 0 });
     this.showForm.set(true);
   }
 

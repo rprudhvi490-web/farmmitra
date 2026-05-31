@@ -35,6 +35,7 @@ export interface Product {
   imageUrl: string;
   available: boolean;
   minOrderQty: number;
+  rating: number;
 }
 
 export interface OrderItem {

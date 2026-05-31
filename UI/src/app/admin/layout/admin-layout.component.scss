@@ -99,4 +99,8 @@ mat-nav-list {
   padding: 24px;
   background: var(--fm-background);
   min-height: calc(100vh - 64px);
+
+  @media (max-width: 600px) {
+    padding: 12px;
+  }
 }

@@ -63,4 +63,18 @@
     gap: 8px;
     padding: 0 28px;
   }
+
+  @media (max-width: 600px) {
+    flex-direction: column-reverse;
+    position: sticky;
+    bottom: 0;
+    background: var(--fm-surface);
+    padding: 12px;
+    margin: 0 -12px;
+    border-top: 1px solid var(--fm-divider);
+    box-shadow: 0 -4px 12px rgba(0,0,0,0.06);
+    z-index: 10;
+
+    a, .place-btn { width: 100%; justify-content: center; }
+  }
 }

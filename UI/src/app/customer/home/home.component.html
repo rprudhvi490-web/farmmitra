@@ -1,66 +1,107 @@
-<div class="page-container">
+<div class="home-page">
 
-  @if (loading()) {
-    <div class="center-spinner">
-      <mat-spinner diameter="48" />
+  <!-- Cycle Status Banner -->
+  @if (!cycleLoading()) {
+    @if (cycle(); as c) {
+      <div class="cycle-banner" [class.banner-open]="c.status === 'OPEN'">
+        <div class="banner-left">
+          <mat-icon [style.color]="getStatusConfig(c.status).color">{{ getStatusConfig(c.status).icon }}</mat-icon>
+          <div>
+            <div class="banner-label">{{ c.cycleLabel }}</div>
+            <div class="banner-message">{{ getStatusConfig(c.status).message }}</div>
+          </div>
+        </div>
+        @if (c.status === 'OPEN' && countdown()) {
+          <div class="countdown-pill">
+            <span class="countdown-label">Closes in</span>
+            <span class="countdown-value">{{ countdown() }}</span>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="cycle-banner">
+        <div class="banner-left">
+          <mat-icon style="color:#9e9e9e">schedule</mat-icon>
+          <div>
+            <div class="banner-label">No active cycle</div>
+            <div class="banner-message">Next ordering window opens Monday at midnight.</div>
+          </div>
+        </div>
+      </div>
+    }
+  }
+
+  <!-- Search Bar -->
+  <div class="search-row">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Search products</mat-label>
+      <input matInput [formControl]="searchControl" placeholder="e.g. Tomatoes" />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <!-- Category Chips -->
+  <div class="category-chips">
+    <button class="chip" [class.chip-active]="selectedCategory() === null" (click)="selectCategory(null)">
+      All
+    </button>
+    @for (cat of categories(); track cat.id) {
+      <button class="chip" [class.chip-active]="selectedCategory() === cat.id" (click)="selectCategory(cat.id)">
+        {{ cat.name }}
+      </button>
+    }
+  </div>
+
+  <!-- Products -->
+  @if (productsLoading()) {
+    <div class="center-spinner"><mat-spinner diameter="48" /></div>
+  } @else if (categoryEntries.length === 0) {
+    <div class="empty-state">
+      <mat-icon>search_off</mat-icon>
+      <p>No products found</p>
     </div>
   } @else {
-
-    <!-- Cycle Status Card -->
-    @if (cycle(); as c) {
-      <mat-card class="cycle-card">
-        <mat-card-content>
-          <div class="cycle-header">
-            <mat-icon [style.color]="getStatusConfig(c.status).color">
-              {{ getStatusConfig(c.status).icon }}
-            </mat-icon>
-            <div>
-              <div class="cycle-label">{{ c.cycleLabel }}</div>
-              <div class="cycle-message">{{ getStatusConfig(c.status).message }}</div>
-            </div>
-          </div>
-
-          @if (c.status === 'OPEN' && countdown()) {
-            <div class="countdown-row">
-              <span class="countdown-label">Closes in</span>
-              <span class="countdown-value">{{ countdown() }}</span>
-            </div>
+    @for (entry of categoryEntries; track entry[0]) {
+      <div class="category-section">
+        <div class="category-heading">{{ entry[0] }}</div>
+        <div class="product-grid">
+          @for (product of entry[1]; track product.id) {
+            <mat-card class="product-card">
+              <div class="product-image">
+                @if (product.imageUrl) {
+                  <img [src]="product.imageUrl" [alt]="product.name" loading="lazy" />
+                } @else {
+                  <mat-icon class="placeholder-icon">local_grocery_store</mat-icon>
+                }
+                @if (product.rating > 0) {
+                  <span class="rating-badge">⭐ {{ product.rating }}</span>
+                }
+              </div>
+              <mat-card-content>
+                <div class="product-name">{{ product.name }}</div>
+                <div class="product-price">₹{{ product.pricePerUnit }} <span class="product-unit">/ {{ product.unit }}</span></div>
+                <div class="product-min">Min: {{ product.minOrderQty }} {{ product.unit }}</div>
+              </mat-card-content>
+              <mat-card-actions>
+                <div class="qty-row">
+                  <button mat-icon-button class="qty-btn" (click)="adjustQty(product.id, product.minOrderQty, -product.minOrderQty)">
+                    <mat-icon>remove</mat-icon>
+                  </button>
+                  <span class="qty-value">{{ getQty(product.id) }} {{ product.unit }}</span>
+                  <button mat-icon-button class="qty-btn" (click)="adjustQty(product.id, product.minOrderQty, product.minOrderQty)">
+                    <mat-icon>add</mat-icon>
+                  </button>
+                </div>
+                <button mat-flat-button class="add-btn" [class.in-cart]="isInCart(product.id)" (click)="addToCart(product)">
+                  <mat-icon>{{ isInCart(product.id) ? 'check' : 'add_shopping_cart' }}</mat-icon>
+                  {{ isInCart(product.id) ? 'Update Cart' : 'Add to Cart' }}
+                </button>
+              </mat-card-actions>
+            </mat-card>
           }
-
-          @if (c.status === 'OPEN') {
-            <a mat-flat-button class="shop-btn" routerLink="/customer/products">
-              <mat-icon>storefront</mat-icon>
-              Shop Now
-            </a>
-          }
-        </mat-card-content>
-      </mat-card>
-    } @else {
-      <mat-card class="cycle-card">
-        <mat-card-content>
-          <div class="cycle-header">
-            <mat-icon style="color:#757575">schedule</mat-icon>
-            <div>
-              <div class="cycle-label">No active cycle</div>
-              <div class="cycle-message">Next ordering window opens Monday at midnight.</div>
-            </div>
-          </div>
-        </mat-card-content>
-      </mat-card>
+        </div>
+      </div>
     }
-
-    <!-- Quick Links -->
-    <div class="quick-links">
-      <a mat-stroked-button routerLink="/customer/orders">
-        <mat-icon>receipt_long</mat-icon> My Orders
-      </a>
-      <a mat-stroked-button routerLink="/customer/profile">
-        <mat-icon>person</mat-icon> My Profile
-      </a>
-      <a mat-stroked-button routerLink="/customer/referral">
-        <mat-icon>card_giftcard</mat-icon> Referral
-      </a>
-    </div>
-
   }
+
 </div>

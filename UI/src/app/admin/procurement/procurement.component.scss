@@ -13,6 +13,17 @@
   gap: 6px;
 }
 
+.mark-all-btn {
+  background: var(--fm-primary) !important;
+  color: white !important;
+  font-weight: 700;
+  font-family: var(--fm-font);
+  border-radius: var(--fm-radius-sm) !important;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .empty-card { text-align: center; padding: 32px; color: var(--fm-text-hint); font-family: var(--fm-font); }
 
 .summary-row {

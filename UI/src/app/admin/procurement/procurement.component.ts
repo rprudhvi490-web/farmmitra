@@ -36,6 +36,7 @@ export class ProcurementComponent implements OnInit {
   selectedCycleId = signal<number | null>(null);
   loading = signal(false);
   exporting = signal(false);
+  markingAll = signal(false);
 
   columns = ['product', 'unit', 'totalQty', 'vendor', 'procuredQty', 'status', 'actions'];
 
@@ -83,6 +84,19 @@ export class ProcurementComponent implements OnInit {
     const val = this.editValues[item.productId];
     this.procurementService.update(this.selectedCycleId()!, item.id, val).subscribe({
       next: () => this.snackbar.open('Saved!', 'Close', { duration: 2000 })
+    });
+  }
+
+  markAllProcured(): void {
+    if (!this.selectedCycleId()) return;
+    this.markingAll.set(true);
+    this.procurementService.markAllProcured(this.selectedCycleId()!).subscribe({
+      next: () => {
+        this.markingAll.set(false);
+        this.snackbar.open('All items marked as PROCURED. GOODS_LOADED triggered.', 'Close', { duration: 3000 });
+        this.loadSheet(this.selectedCycleId()!);
+      },
+      error: () => this.markingAll.set(false)
     });
   }
 

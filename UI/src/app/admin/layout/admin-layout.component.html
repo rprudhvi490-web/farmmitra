@@ -1,6 +1,6 @@
 <mat-sidenav-container class="sidenav-container">
 
-  <mat-sidenav [opened]="sidenavOpen()" mode="side" class="sidenav">
+  <mat-sidenav [opened]="sidenavOpen()" [mode]="sidenavMode" class="sidenav">
     <div class="sidenav-header">
       <img src="farmmitra-logo.png" alt="FarmMitra" class="brand-logo" />
       <span class="brand-name">FarmMitra</span>
@@ -10,7 +10,8 @@
       @for (item of navItems; track item.route) {
         <a mat-list-item
            [routerLink]="item.route"
-           routerLinkActive="active-link">
+           routerLinkActive="active-link"
+           (click)="isMobile() && sidenavOpen.set(false)">
           <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
           <span matListItemTitle>{{ item.label }}</span>
         </a>
