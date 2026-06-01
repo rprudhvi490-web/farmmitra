@@ -1,5 +1,4 @@
-import { Component, inject, signal, OnInit, DestroyRef } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { catchError, of } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -34,7 +33,6 @@ export class CycleStockComponent implements OnInit {
   private cycleService = inject(AdminCycleService);
   private stockService = inject(CycleProductAdminService);
   private snackbar = inject(MatSnackBar);
-  private destroyRef = inject(DestroyRef);
 
   cycles = signal<WeeklyCycle[]>([]);
   selectedCycleId = signal<number | null>(null);
@@ -43,26 +41,25 @@ export class CycleStockComponent implements OnInit {
   loading = signal(false);
   saving = signal(false);
 
-  // productId → editable maxStock value
   editValues: Record<number, number | null> = {};
-
+  cachedDisplayRows: any[] = [];
   columns = ['product', 'unit', 'maxStock', 'orderedQty', 'remainingQty', 'soldOut'];
 
   ngOnInit(): void {
-    this.cycleService.getAll()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(cycles => {
-        this.cycles.set(cycles);
-        // Default to OPEN cycle, else first
-        const open = cycles.find(c => c.status === 'OPEN') ?? cycles[0];
-        if (open) { this.selectedCycleId.set(open.id); this.load(open.id); }
+    this.stockService.getSuggestions()
+      .pipe(catchError(() => of([] as StockSuggestion[])))
+      .subscribe({
+        next: s => { this.suggestions.set(s); this.updateDisplayRows(); }
       });
 
-    this.stockService.getSuggestions()
-      .pipe(takeUntilDestroyed(this.destroyRef))
+    this.cycleService.getAll()
+      .pipe(catchError(() => of([] as WeeklyCycle[])))
       .subscribe({
-        next: s => this.suggestions.set(s),
-        error: () => this.suggestions.set([])
+        next: cycles => {
+          this.cycles.set(cycles);
+          const target = cycles.find(c => c.status === 'OPEN') ?? cycles[0];
+          if (target) { this.selectedCycleId.set(target.id); this.load(target.id); }
+        }
       });
   }
 
@@ -74,31 +71,26 @@ export class CycleStockComponent implements OnInit {
   load(cycleId: number): void {
     this.loading.set(true);
     this.stockService.getForCycle(cycleId)
-      .pipe(
-        catchError(() => of([]))
-      )
-      .subscribe(rows => {
-        this.rows.set(rows);
-        this.loading.set(false);
-        rows.forEach(r => this.editValues[r.productId] = r.maxStock);
-        this.applySuggestions(rows);
-        this.suggestions().forEach(s => {
-          if (!(s.productId in this.editValues)) {
-            this.editValues[s.productId] = s.suggestedMaxStock;
-          }
-        });
+      .pipe(catchError(() => of([] as CycleProductResponse[])))
+      .subscribe({
+        next: rows => {
+          const safe = rows ?? [];
+          this.rows.set(safe);
+          this.editValues = {};
+          safe.forEach(r => this.editValues[r.productId] = r.maxStock);
+          this.suggestions().forEach(s => {
+            if (!(s.productId in this.editValues)) {
+              this.editValues[s.productId] = s.suggestedMaxStock;
+            }
+          });
+          this.updateDisplayRows();
+          this.loading.set(false);
+        },
+        error: () => this.loading.set(false)
       });
   }
 
-  private applySuggestions(existing: CycleProductResponse[]): void {
-    const existingIds = new Set(existing.map(r => r.productId));
-    this.suggestions()
-      .filter(s => !existingIds.has(s.productId))
-      .forEach(s => { this.editValues[s.productId] = s.suggestedMaxStock; });
-  }
-
-  // Rows to display: configured rows + unconfigured suggestions
-  get displayRows(): any[] {
+  private updateDisplayRows(): void {
     const configured = this.rows();
     const configuredIds = new Set(configured.map(r => r.productId));
     const unconfigured = this.suggestions()
@@ -113,7 +105,7 @@ export class CycleStockComponent implements OnInit {
         soldOut: false,
         unsaved: true
       }));
-    return [...configured, ...unconfigured];
+    this.cachedDisplayRows = [...configured, ...unconfigured];
   }
 
   saveAll(): void {
@@ -131,11 +123,12 @@ export class CycleStockComponent implements OnInit {
 
     this.saving.set(true);
     this.stockService.bulkSetStock(cycleId, { items })
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(catchError(() => of([] as CycleProductResponse[])))
       .subscribe({
         next: rows => {
           this.rows.set(rows);
           rows.forEach(r => this.editValues[r.productId] = r.maxStock);
+          this.updateDisplayRows();
           this.saving.set(false);
           this.snackbar.open('Stock limits saved!', 'Close', { duration: 2500 });
         },

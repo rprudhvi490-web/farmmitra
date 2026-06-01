@@ -32,7 +32,7 @@
   <div class="center-spinner"><mat-spinner diameter="48" /></div>
 } @else {
   <mat-card>
-    <table mat-table [dataSource]="displayRows" class="full-width">
+    <table mat-table [dataSource]="cachedDisplayRows" class="full-width">
 
       <ng-container matColumnDef="product">
         <th mat-header-cell *matHeaderCellDef>Product</th>
