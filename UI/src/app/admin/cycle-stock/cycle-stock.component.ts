@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { catchError, of } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -59,7 +60,10 @@ export class CycleStockComponent implements OnInit {
 
     this.stockService.getSuggestions()
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(s => this.suggestions.set(s));
+      .subscribe({
+        next: s => this.suggestions.set(s),
+        error: () => this.suggestions.set([])
+      });
   }
 
   onCycleChange(cycleId: number): void {
@@ -70,24 +74,19 @@ export class CycleStockComponent implements OnInit {
   load(cycleId: number): void {
     this.loading.set(true);
     this.stockService.getForCycle(cycleId)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: rows => {
-          this.rows.set(rows);
-          this.loading.set(false);
-          rows.forEach(r => this.editValues[r.productId] = r.maxStock);
-          // Pre-fill suggestions for products not yet configured
-          this.applySuggestions(rows);
-        },
-        error: () => {
-          // No records yet — show suggestion-based empty table
-          this.rows.set([]);
-          this.loading.set(false);
-          this.editValues = {};
-          this.suggestions().forEach(s => {
+      .pipe(
+        catchError(() => of([]))
+      )
+      .subscribe(rows => {
+        this.rows.set(rows);
+        this.loading.set(false);
+        rows.forEach(r => this.editValues[r.productId] = r.maxStock);
+        this.applySuggestions(rows);
+        this.suggestions().forEach(s => {
+          if (!(s.productId in this.editValues)) {
             this.editValues[s.productId] = s.suggestedMaxStock;
-          });
-        }
+          }
+        });
       });
   }
 
