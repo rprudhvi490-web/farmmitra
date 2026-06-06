@@ -8,9 +8,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
 import { NotificationAdminService } from '../services/admin.services';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-admin-notifications',
@@ -26,7 +26,7 @@ import { NotificationAdminService } from '../services/admin.services';
 })
 export class AdminNotificationsComponent {
   private svc = inject(NotificationAdminService);
-  private snackbar = inject(MatSnackBar);
+  private toast = inject(ToastService);
   private destroyRef = inject(DestroyRef);
 
   broadcastSending = signal(false);
@@ -44,26 +44,34 @@ export class AdminNotificationsComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.snackbar.open('Broadcast sent!', 'Close', { duration: 3000 });
+          this.toast.success('Broadcast sent to all users!');
           this.broadcast = { title: '', body: '', type: 'ANNOUNCEMENT' };
           this.broadcastSending.set(false);
         },
-        error: () => this.broadcastSending.set(false)
+        error: (err: any) => {
+          this.toast.error(err.error?.message ?? 'Failed to send broadcast.');
+          this.broadcastSending.set(false);
+        }
       });
   }
 
   sendDirect(): void {
     if (!this.direct.userId || !this.direct.title || !this.direct.body) return;
     this.directSending.set(true);
-    this.svc.sendToUser(this.direct)
+    // Coerce userId to number — ngModel on number input returns string
+    const payload = { ...this.direct, userId: Number(this.direct.userId) };
+    this.svc.sendToUser(payload)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.snackbar.open('Notification sent!', 'Close', { duration: 3000 });
+          this.toast.success('Notification sent!');
           this.direct = { userId: null, title: '', body: '', type: 'ORDER_UPDATE' };
           this.directSending.set(false);
         },
-        error: () => this.directSending.set(false)
+        error: (err: any) => {
+          this.toast.error(err.error?.message ?? 'Failed to send notification.');
+          this.directSending.set(false);
+        }
       });
   }
 }

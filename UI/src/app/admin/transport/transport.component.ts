@@ -8,9 +8,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TransportService, TransportStage, AdminCycleService, WeeklyCycle } from '../services/admin.services';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-transport',
@@ -26,7 +26,7 @@ import { TransportService, TransportStage, AdminCycleService, WeeklyCycle } from
 export class TransportComponent implements OnInit {
   private transportService = inject(TransportService);
   private cycleService = inject(AdminCycleService);
-  private snackbar = inject(MatSnackBar);
+  private toast = inject(ToastService);
   private destroyRef = inject(DestroyRef);
 
   cycles = signal<WeeklyCycle[]>([]);
@@ -67,8 +67,9 @@ export class TransportComponent implements OnInit {
     this.cycleService.getAll()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(c => {
-        this.cycles.set(c);
-        if (c.length > 0) { this.selectedCycleId.set(c[0].id); this.loadStages(c[0].id); }
+        const sorted = [...c].reverse();
+        this.cycles.set(sorted);
+        if (sorted.length > 0) { this.selectedCycleId.set(sorted[0].id); this.loadStages(sorted[0].id); }
       });
   }
 
@@ -94,7 +95,7 @@ export class TransportComponent implements OnInit {
       next: () => {
         this.saving.set(false);
         this.form.reset();
-        this.snackbar.open('Stage added! Customers notified.', 'Close', { duration: 3000 });
+        this.toast.success('Stage added! Customers notified.');
         this.loadStages(this.selectedCycleId()!);
       },
       error: () => this.saving.set(false)

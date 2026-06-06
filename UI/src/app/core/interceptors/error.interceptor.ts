@@ -1,13 +1,13 @@
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { catchError, throwError } from 'rxjs';
 import { TokenService } from '../services/token.service';
+import { ToastService } from '../services/toast.service';
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
-  const router = inject(Router);
-  const snackbar = inject(MatSnackBar);
+  const router       = inject(Router);
+  const toast        = inject(ToastService);
   const tokenService = inject(TokenService);
 
   return next(req).pipe(
@@ -20,17 +20,17 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
           router.navigate(['/auth/login']);
           break;
         case 403:
-          snackbar.open('Access denied.', 'Close', { duration: 3000 });
+          toast.error('Access denied.');
           break;
         case 429:
-          snackbar.open('Too many attempts. Please wait and try again.', 'Close', { duration: 4000 });
+          toast.error('Too many attempts. Please wait and try again.');
           break;
         case 400:
         case 422:
-          snackbar.open(message, 'Close', { duration: 3000 });
+          toast.error(message);
           break;
         case 500:
-          snackbar.open('Server error. Please try again later.', 'Close', { duration: 4000 });
+          toast.error('Server error. Please try again later.');
           break;
       }
 

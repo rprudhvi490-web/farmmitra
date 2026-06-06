@@ -3,6 +3,7 @@ package com.weekendbasket.app.service;
 import com.weekendbasket.app.dto.ProcurementDto.*;
 import com.weekendbasket.app.event.CycleClosedEvent;
 import com.weekendbasket.app.exception.ResourceNotFoundException;
+import com.weekendbasket.app.exception.WeekendBasketException;
 import com.weekendbasket.app.model.*;
 import com.weekendbasket.app.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -33,13 +34,18 @@ public class ProcurementService {
     private final OrderItemRepository orderItemRepository;
     private final UserProfileRepository userProfileRepository;
     private final TransportTrackingService transportTrackingService;
+    private final ProcurementEmailService procurementEmailService;
 
-    // Async — cycle close API returns immediately, aggregation runs on background thread
+    // Async — cycle close API returns immediately, aggregation + email run on background thread
     @EventListener
     @Async("appTaskExecutor")
     @Transactional
     public void onCycleClosed(CycleClosedEvent event) {
         aggregateForCycle(event.cycleId());
+        // After aggregation, send Excel to all PROCUREMENT users
+        WeeklyCycle cycle = cycleRepository.findById(event.cycleId()).orElseThrow();
+        long totalOrders = orderRepository.countByCycleId(event.cycleId());
+        procurementEmailService.sendProcurementExcel(event.cycleId(), cycle.getCycleLabel(), totalOrders);
     }
 
     // Called automatically when cycle closes
@@ -107,11 +113,18 @@ public class ProcurementService {
     @Transactional
     public void markAllProcured(Long cycleId) {
         List<ProcurementSheet> items = procurementRepository.findByCycleId(cycleId);
+        if (items.isEmpty()) throw new WeekendBasketException("No procurement items found for this cycle");
+
+        long alreadyProcured = items.stream().filter(i -> "PROCURED".equals(i.getStatus())).count();
+        if (alreadyProcured == items.size()) {
+            throw new WeekendBasketException("All items are already marked as PROCURED");
+        }
+
         items.forEach(item -> {
             item.setStatus("PROCURED");
             procurementRepository.save(item);
         });
-        // Auto-trigger GOODS_LOADED
+        // autoAddStage is idempotent — skips if GOODS_LOADED already exists
         transportTrackingService.autoAddStage(cycleId, "GOODS_LOADED",
                 "All items marked as procured — goods loaded");
         log.info("All {} items marked PROCURED for cycle {} — GOODS_LOADED triggered", items.size(), cycleId);

@@ -43,12 +43,39 @@
   mat-icon { color: var(--fm-primary); font-size: 20px; width: 20px; height: 20px; }
 }
 
+.cancel-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-family: var(--fm-font);
+  color: var(--fm-text-secondary);
+  background: var(--fm-green-50);
+  border: 1px solid var(--fm-green-100);
+  border-radius: var(--fm-radius-sm);
+  padding: 10px 14px;
+  margin-top: 8px;
+  mat-icon { color: var(--fm-primary); font-size: 18px; width: 18px; height: 18px; flex-shrink: 0; }
+}
+
 .cancel-btn {
   color: #c62828;
   border-color: #c62828;
   margin-top: 8px;
   font-weight: 700;
   font-family: var(--fm-font);
+}
+
+.cancel-blocked {
+  margin-top: 8px;
+  .cancel-note {
+    font-size: 13px;
+    font-family: var(--fm-font);
+    color: var(--fm-text-secondary);
+    margin: 8px 0 0;
+    line-height: 1.5;
+    .support-number { color: var(--fm-primary); font-weight: 700; text-decoration: none; }
+  }
 }
 
 .reorder-btn {

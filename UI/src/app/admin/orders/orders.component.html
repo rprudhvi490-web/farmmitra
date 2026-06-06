@@ -42,10 +42,10 @@
         <td mat-cell *matCellDef="let o">
           @if (o.paymentStatus === 'PAID') {
             <span class="paid-label">✓ PAID</span>
+          } @else if (o.status === 'DELIVERED') {
+            <button mat-stroked-button class="pay-btn" (click)="markPaid(o.id)">Mark Paid</button>
           } @else {
-            <button mat-stroked-button class="pay-btn" (click)="markPaid(o.id)">
-              Mark Paid
-            </button>
+            <span class="pay-pending" [title]="'Payment can be collected only after delivery'">Pending delivery</span>
           }
         </td>
       </ng-container>
@@ -63,12 +63,27 @@
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef>Update Status</th>
         <td mat-cell *matCellDef="let o">
-          <mat-select [value]="o.status" (selectionChange)="updateStatus(o.id, $event.value)"
-                      class="status-select">
-            @for (s of statusOptions; track s) {
-              <mat-option [value]="s">{{ s }}</mat-option>
-            }
-          </mat-select>
+          @if (o.status !== 'CANCELLED' && o.status !== 'DELIVERED') {
+            <mat-select [value]="o.status" (selectionChange)="updateStatus(o.id, $event.value)"
+                        class="status-select">
+              @for (s of statusOptions; track s) {
+                <mat-option [value]="s">{{ s }}</mat-option>
+              }
+            </mat-select>
+          } @else {
+            <span class="status-final">—</span>
+          }
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="cancel">
+        <th mat-header-cell *matHeaderCellDef>Cancel</th>
+        <td mat-cell *matCellDef="let o">
+          @if (o.status !== 'CANCELLED' && o.status !== 'DELIVERED') {
+            <button mat-icon-button class="cancel-btn" (click)="cancelOrder(o.id)" title="Cancel Order">
+              <mat-icon>cancel</mat-icon>
+            </button>
+          }
         </td>
       </ng-container>
 

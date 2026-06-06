@@ -6,14 +6,17 @@ import com.weekendbasket.app.exception.WeekendBasketException;
 import com.weekendbasket.app.model.RoleAccess;
 import com.weekendbasket.app.model.User;
 import com.weekendbasket.app.model.UserProfile;
+import com.weekendbasket.app.model.UserToken;
 import com.weekendbasket.app.repository.RoleAccessRepository;
 import com.weekendbasket.app.repository.RoleRepository;
 import com.weekendbasket.app.repository.UserProfileRepository;
 import com.weekendbasket.app.repository.UserRepository;
+import com.weekendbasket.app.repository.UserTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -24,6 +27,7 @@ public class UserService {
     private final UserProfileRepository profileRepository;
     private final RoleRepository roleRepository;
     private final RoleAccessRepository roleAccessRepository;
+    private final UserTokenRepository userTokenRepository;
 
     @Transactional(readOnly = true)
     public UserProfileResponse getMyProfile(String phoneNumber) {
@@ -114,6 +118,40 @@ public class UserService {
                 .user(user)
                 .role(role)
                 .build());
+    }
+
+    @Transactional
+    public void removeRole(Long userId, String roleId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+        roleAccessRepository.deleteByUserIdAndRoleId(userId, roleId);
+    }
+
+    @Transactional
+    public void saveToken(Long userId, String tokenHash, LocalDateTime issuedAt,
+                          LocalDateTime expiredAt, String deviceHint) {
+        User user = userRepository.findById(userId).orElseThrow();
+        userTokenRepository.save(UserToken.builder()
+                .user(user)
+                .tokenHash(tokenHash)
+                .issuedAt(issuedAt)
+                .expiredAt(expiredAt)
+                .lastUsedAt(issuedAt)
+                .deviceHint(deviceHint)
+                .build());
+    }
+
+    @Transactional(readOnly = true)
+    public List<SessionResponse> getActiveSessions(Long userId) {
+        LocalDateTime now = LocalDateTime.now();
+        return userTokenRepository.findActiveSessions(userId, now).stream()
+                .map(t -> new SessionResponse(
+                        t.getIssuedAt(),
+                        t.getLastUsedAt(),
+                        t.getExpiredAt(),
+                        t.getDeviceHint(),
+                        t.getLastUsedAt().isAfter(now.minusMinutes(5))))
+                .toList();
     }
 
     private UserProfileResponse buildResponse(User user) {

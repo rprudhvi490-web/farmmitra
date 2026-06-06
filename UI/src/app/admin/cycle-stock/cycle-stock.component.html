@@ -7,7 +7,7 @@
       <mat-icon>auto_fix_high</mat-icon> Apply Suggestions
     </button>
     <button mat-flat-button class="save-btn" (click)="saveAll()" [disabled]="saving()">
-      @if (saving()) { <mat-spinner diameter="18" /> } @else { <mat-icon>save</mat-icon> Save All }
+      @if (saving()) { <mat-spinner diameter="18" /> } @else { <ng-container><mat-icon>save</mat-icon> Save All</ng-container> }
     </button>
   </div>
 </div>

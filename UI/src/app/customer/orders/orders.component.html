@@ -17,7 +17,7 @@
             <div class="order-header">
               <div>
                 <div class="order-number">{{ order.orderNumber }}</div>
-                <div class="order-date">{{ order.createdOn | date:'dd MMM yyyy, hh:mm a' }}</div>
+                <div class="order-date">{{ order.cycleLabel }} &nbsp;·&nbsp; {{ order.createdOn | date:'dd MMM, hh:mm a' }}</div>
               </div>
               <span class="status-chip {{ getStatusClass(order.status) }}">{{ order.status }}</span>
             </div>

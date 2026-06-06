@@ -20,7 +20,8 @@ public class ProductDto {
             BigDecimal pricePerUnit,
             String imageUrl,
             BigDecimal minOrderQty,
-            BigDecimal rating
+            BigDecimal rating,
+            String specialDescription
     ) {}
 
     public record ProductResponse(
@@ -34,6 +35,9 @@ public class ProductDto {
             String imageUrl,
             Boolean available,
             BigDecimal minOrderQty,
-            BigDecimal rating
+            BigDecimal rating,
+            String specialDescription,
+            Boolean soldOut,
+            Boolean stockConfigured
     ) {}
 }

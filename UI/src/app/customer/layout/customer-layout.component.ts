@@ -10,6 +10,8 @@ import { CartService } from '../services/cart.service';
 import { AuthService } from '../../core/services/auth.service';
 import { TokenService } from '../../core/services/token.service';
 import { NotificationService } from '../services/notification.service';
+import { NotificationBannerComponent } from '../../core/components/notification-banner.component';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-customer-layout',
@@ -18,21 +20,22 @@ import { NotificationService } from '../services/notification.service';
     RouterOutlet, RouterLink, RouterLinkActive,
     CommonModule,
     MatToolbarModule, MatButtonModule, MatIconModule,
-    MatMenuModule
+    MatMenuModule, NotificationBannerComponent
   ],
   templateUrl: './customer-layout.component.html',
   styleUrl: './customer-layout.component.scss'
 })
 export class CustomerLayoutComponent implements OnInit {
-  private cartService = inject(CartService);
-  private authService = inject(AuthService);
+  private cartService  = inject(CartService);
+  private authService  = inject(AuthService);
   private tokenService = inject(TokenService);
   private notifService = inject(NotificationService);
-  private destroyRef = inject(DestroyRef);
+  private toast        = inject(ToastService);
+  private destroyRef   = inject(DestroyRef);
 
-  cartCount = signal(0);
+  cartCount   = signal(0);
   unreadCount = signal(0);
-  phone = this.tokenService.getPhone();
+  phone    = this.tokenService.getPhone();
   username = this.tokenService.getUsername();
 
   ngOnInit(): void {
@@ -42,7 +45,23 @@ export class CustomerLayoutComponent implements OnInit {
 
     this.notifService.getMy()
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(n => this.unreadCount.set(n.filter(x => !x.readStatus).length));
+      .subscribe(n => {
+        this.unreadCount.set(n.filter(x => !x.readStatus).length);
+        this.showOrderUpdates(n.filter(x => !x.readStatus && x.type === 'ORDER_UPDATE'));
+      });
+  }
+
+  private showOrderUpdates(notifications: any[]): void {
+    if (!notifications.length) return;
+    // Mark all read first to prevent re-showing on next navigation
+    notifications.forEach(n => this.notifService.markRead(n.id).subscribe());
+    // Then show sequentially 1.5s apart
+    notifications.forEach((n, i) => {
+      setTimeout(() => {
+        this.toast.info(`${n.title}: ${n.body}`);
+        this.unreadCount.update(c => Math.max(0, c - 1));
+      }, i * 1500);
+    });
   }
 
   logout(): void {

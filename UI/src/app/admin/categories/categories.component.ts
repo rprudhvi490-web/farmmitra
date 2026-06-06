@@ -8,11 +8,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { CloudinaryService } from '../../core/services/cloudinary.service';
+import { ToastService } from '../../core/services/toast.service';
 
 export interface Category {
   id: number;
@@ -37,7 +37,7 @@ export interface Category {
 export class CategoriesComponent implements OnInit {
   private http = inject(HttpClient);
   private cloudinary = inject(CloudinaryService);
-  private snackbar = inject(MatSnackBar);
+  private toast = inject(ToastService);
   private destroyRef = inject(DestroyRef);
   private base = environment.apiBaseUrl;
 
@@ -84,9 +84,9 @@ export class CategoriesComponent implements OnInit {
       next: url => {
         this.form.patchValue({ imageUrl: url });
         this.uploading.set(false);
-        this.snackbar.open('Image uploaded!', 'Close', { duration: 2000 });
+        this.toast.success('Image uploaded!');
       },
-      error: () => { this.uploading.set(false); this.snackbar.open('Upload failed', 'Close', { duration: 3000 }); }
+      error: () => { this.uploading.set(false); this.toast.error('Image upload failed.'); }
     });
   }
 
@@ -101,7 +101,7 @@ export class CategoriesComponent implements OnInit {
       next: () => {
         this.saving.set(false);
         this.showForm.set(false);
-        this.snackbar.open(this.editingId() ? 'Category updated!' : 'Category created!', 'Close', { duration: 2000 });
+        this.toast.success(this.editingId() ? 'Category updated!' : 'Category created!');
         this.load();
       },
       error: () => this.saving.set(false)

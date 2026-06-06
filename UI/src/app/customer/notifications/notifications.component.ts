@@ -29,8 +29,8 @@ export class NotificationsComponent implements OnInit {
     this.notifService.getMy()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: n => { this.notifications.set(n); this.loading.set(false); },
-        error: () => this.loading.set(false)
+        next: n => { this.notifications.set(n ?? []); this.loading.set(false); },
+        error: () => { this.notifications.set([]); this.loading.set(false); }
       });
   }
 

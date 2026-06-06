@@ -80,6 +80,9 @@
               <mat-card-content>
                 <div class="product-name">{{ product.name }}</div>
                 <div class="product-price">₹{{ product.pricePerUnit }} <span class="product-unit">/ {{ product.unit }}</span></div>
+                @if (product.specialDescription) {
+                  <div class="product-tagline">{{ product.specialDescription }}</div>
+                }
                 <div class="product-min">Min: {{ product.minOrderQty }} {{ product.unit }}</div>
               </mat-card-content>
               <mat-card-actions>

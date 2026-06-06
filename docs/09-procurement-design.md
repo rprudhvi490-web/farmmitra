@@ -122,6 +122,42 @@ Library: Apache POI (`poi-ooxml`).
 
 ---
 
+## Auto Email on Cycle Close (Phase 12 — Planned)
+
+When the cycle closes (scheduler or admin), after procurement aggregation is complete:
+1. System generates the procurement Excel (same as manual export)
+2. Fetches all users with `ROLE_PROCUREMENT` who have a non-null email
+3. Sends the Excel as an email attachment to each procurement user
+4. Subject: `FarmMitra — Procurement Sheet: {cycleLabel}`
+5. Body: "Please find this week's procurement sheet attached. Total orders: {n}"
+
+**Implementation approach (single async listener for guaranteed ordering):**
+```java
+@EventListener
+@Async("appTaskExecutor")
+@Transactional
+public void onCycleClosed(CycleClosedEvent event) {
+    aggregateForCycle(event.cycleId());  // Step 1: aggregate
+    autoAddStage(PROCUREMENT_STARTED);   // Step 2: transport stage
+    emailService.sendProcurementExcel(event.cycleId()); // Step 3: email
+}
+```
+All three steps on the same background thread — guaranteed order, admin sees instant response.
+
+**Email service: Gmail SMTP (free)**
+- Dedicated Gmail: `farmmitra.ops@gmail.com`
+- App Password from Google Account → Security → App Passwords
+```properties
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=farmmitra.ops@gmail.com
+spring.mail.password=<app-password>
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+```
+
+---
+
 ## Transport Tracking
 
 Append-only log of stages. Each stage update:

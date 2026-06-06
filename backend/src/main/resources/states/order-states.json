@@ -29,9 +29,23 @@
   },
   {
     "entity": "ORDER",
+    "from": "PLACED",
+    "to": ["CANCELLED"],
+    "action": "ADMIN_CANCEL",
+    "sideEffect": null
+  },
+  {
+    "entity": "ORDER",
     "from": "CONFIRMED",
     "to": ["CANCELLED"],
-    "action": "ADMIN_UPDATE",
+    "action": "ADMIN_CANCEL",
+    "sideEffect": null
+  },
+  {
+    "entity": "ORDER",
+    "from": "PACKED",
+    "to": ["CANCELLED"],
+    "action": "ADMIN_CANCEL",
     "sideEffect": null
   }
 ]

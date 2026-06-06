@@ -9,9 +9,9 @@ import { MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AdminCycleService, WeeklyCycle } from '../services/admin.services';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-cycles',
@@ -27,7 +27,7 @@ import { AdminCycleService, WeeklyCycle } from '../services/admin.services';
 })
 export class CyclesComponent implements OnInit {
   private cycleService = inject(AdminCycleService);
-  private snackbar = inject(MatSnackBar);
+  private toast = inject(ToastService);
   private destroyRef = inject(DestroyRef);
 
   cycles = signal<WeeklyCycle[]>([]);
@@ -76,7 +76,7 @@ export class CyclesComponent implements OnInit {
         this.saving.set(false);
         this.showCreateForm.set(false);
         this.createForm.reset();
-        this.snackbar.open('Cycle created!', 'Close', { duration: 3000 });
+        this.toast.success('Cycle created!');
         this.loadCycles();
       },
       error: () => this.saving.set(false)
@@ -85,19 +85,19 @@ export class CyclesComponent implements OnInit {
 
   open(id: number): void {
     this.cycleService.open(id).subscribe({
-      next: () => { this.snackbar.open('Cycle opened!', 'Close', { duration: 2000 }); this.loadCycles(); }
+      next: () => { this.toast.success('Cycle opened!'); this.loadCycles(); }
     });
   }
 
   close(id: number): void {
     this.cycleService.close(id).subscribe({
-      next: () => { this.snackbar.open('Cycle closed!', 'Close', { duration: 2000 }); this.loadCycles(); }
+      next: () => { this.toast.success('Cycle closed!'); this.loadCycles(); }
     });
   }
 
   updateStatus(id: number, status: string): void {
     this.cycleService.updateStatus(id, status).subscribe({
-      next: () => { this.snackbar.open('Status updated!', 'Close', { duration: 2000 }); this.loadCycles(); }
+      next: () => { this.toast.success('Status updated!'); this.loadCycles(); }
     });
   }
 

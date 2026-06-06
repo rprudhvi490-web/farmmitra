@@ -13,7 +13,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.time.LocalDateTime;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,6 +35,7 @@ public class AuthService {
     private final InvalidatedTokenRepository invalidatedTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final ReferralService referralService;
+    private final UserTokenRepository userTokenRepository;
 
     @Value("${jwt.expiration.ms}")
     private long otpExpiryMs;
@@ -69,6 +73,7 @@ public class AuthService {
         // OTP login → 10 hour token
         List<String> roles = loadRoles(user.getId());
         String token = jwtUtil.generateToken(user.getPhoneNumber(), roles, otpExpiryMs);
+        saveTokenRecord(user, token, otpExpiryMs, null);
 
         return new AuthResponse(token, otpExpiryMs, user.getPhoneNumber(),
                 user.getUsername(), roles, isNewUser, user.getHasPassword());
@@ -95,6 +100,7 @@ public class AuthService {
         // Password login → 7 day token
         List<String> roles = loadRoles(user.getId());
         String token = jwtUtil.generateToken(user.getPhoneNumber(), roles, passwordExpiryMs);
+        saveTokenRecord(user, token, passwordExpiryMs, null);
 
         log.info("Password login: {}", user.getPhoneNumber());
         return new AuthResponse(token, passwordExpiryMs, user.getPhoneNumber(),
@@ -161,5 +167,23 @@ public class AuthService {
 
     private String generateReferralCode() {
         return UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase();
+    }
+
+    private void saveTokenRecord(User user, String token, long expiryMs, String deviceHint) {
+        try {
+            String hash = HexFormat.of().formatHex(
+                    MessageDigest.getInstance("SHA-256").digest(token.getBytes(StandardCharsets.UTF_8)));
+            LocalDateTime now = LocalDateTime.now();
+            userTokenRepository.save(UserToken.builder()
+                    .user(user)
+                    .tokenHash(hash)
+                    .issuedAt(now)
+                    .expiredAt(now.plusNanos(expiryMs * 1_000_000L))
+                    .lastUsedAt(now)
+                    .deviceHint(deviceHint)
+                    .build());
+        } catch (Exception e) {
+            log.warn("Failed to save token record: {}", e.getMessage());
+        }
     }
 }

@@ -4,13 +4,55 @@
 .center-spinner { display: flex; justify-content: center; padding: 60px; }
 .full-width { width: 100%; }
 
-.role-chips { display: flex; gap: 4px; flex-wrap: wrap; }
-.role-chip { background: #e8f5e9; color: #2e7d32; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+.role-chips { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 6px; }
 
-.status-active  { color: #2e7d32; font-weight: 600; font-size: 13px; }
-.status-blocked { color: #c62828; font-weight: 600; font-size: 13px; }
+.role-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 2px 6px 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--fm-font);
 
-.action-row { display: flex; align-items: center; gap: 8px; }
+  .remove-role-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #c62828;
+    font-size: 10px;
+    padding: 0;
+    line-height: 1;
+    opacity: 0.7;
+    &:hover { opacity: 1; }
+  }
+}
+
+.assign-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.role-select { min-width: 120px; font-size: 12px; }
+.assign-btn { color: var(--fm-primary); width: 32px; height: 32px; }
+
+.status-active  { color: #2e7d32; font-weight: 600; font-size: 13px; font-family: var(--fm-font); }
+.status-blocked { color: #c62828; font-weight: 600; font-size: 13px; font-family: var(--fm-font); }
+
 .block-btn   { color: #c62828; border-color: #c62828; font-size: 12px; }
 .unblock-btn { color: #2e7d32; border-color: #2e7d32; font-size: 12px; }
-.role-select { min-width: 130px; font-size: 13px; }
+
+.sessions-btn {
+  color: var(--fm-primary);
+  border-color: var(--fm-primary);
+  font-size: 12px;
+  font-family: var(--fm-font);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}

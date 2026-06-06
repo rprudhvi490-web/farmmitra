@@ -1,9 +1,9 @@
 package com.weekendbasket.app.dto;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class UserDto {
@@ -34,6 +34,19 @@ public class UserDto {
     public record AssignRoleRequest(
             @NotBlank(message = "Role ID is required")
             String roleId
+    ) {}
+
+    public record RemoveRoleRequest(
+            @NotBlank(message = "Role ID is required")
+            String roleId
+    ) {}
+
+    public record SessionResponse(
+            LocalDateTime issuedAt,
+            LocalDateTime lastUsedAt,
+            LocalDateTime expiredAt,
+            String deviceHint,
+            boolean activeNow
     ) {}
 
     public record UpdateUsernameRequest(

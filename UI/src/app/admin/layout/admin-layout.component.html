@@ -20,7 +20,7 @@
 
     <div class="sidenav-footer">
       <span class="phone">{{ tokenService.getPhone() }}</span>
-      <span class="role">Super Admin</span>
+      <span class="role">{{ roleLabel }}</span>
     </div>
   </mat-sidenav>
 
@@ -40,6 +40,8 @@
         </button>
       </mat-menu>
     </mat-toolbar>
+
+    <app-notification-banner />
 
     <div class="content">
       <router-outlet />

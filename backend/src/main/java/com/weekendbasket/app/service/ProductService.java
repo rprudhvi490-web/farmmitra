@@ -3,15 +3,20 @@ package com.weekendbasket.app.service;
 import com.weekendbasket.app.dto.ProductDto.*;
 import com.weekendbasket.app.exception.ResourceNotFoundException;
 import com.weekendbasket.app.model.Category;
+import com.weekendbasket.app.model.CycleProduct;
 import com.weekendbasket.app.model.Product;
 import com.weekendbasket.app.repository.CategoryRepository;
+import com.weekendbasket.app.repository.CycleProductRepository;
 import com.weekendbasket.app.repository.ProductRepository;
+import com.weekendbasket.app.repository.WeeklyCycleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -19,13 +24,24 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final CycleProductRepository cycleProductRepository;
+    private final WeeklyCycleRepository cycleRepository;
+
+    // Builds a map of productId -> CycleProduct for the current OPEN cycle (empty if none)
+    private Map<Long, CycleProduct> currentCycleStockMap() {
+        return cycleRepository.findTopByStatusOrderByOrderOpenAtDesc("OPEN")
+                .map(c -> cycleProductRepository.findByCycleId(c.getId()).stream()
+                        .collect(Collectors.toMap(cp -> cp.getProduct().getId(), cp -> cp)))
+                .orElse(Map.of());
+    }
 
     @Transactional(readOnly = true)
     public List<ProductResponse> getAvailableProducts(Long categoryId, String search) {
         String searchPattern = (search != null && !search.isBlank())
                 ? "%" + search + "%" : null;
+        Map<Long, CycleProduct> stockMap = currentCycleStockMap();
         return productRepository.findAvailableFilteredEager(categoryId, search, searchPattern)
-                .stream().map(this::toResponse).toList();
+                .stream().map(p -> toResponse(p, stockMap)).toList();
     }
 
     @Transactional(readOnly = true)
@@ -58,6 +74,7 @@ public class ProductService {
                 .imageUrl(request.imageUrl())
                 .minOrderQty(request.minOrderQty())
                 .rating(request.rating() != null ? request.rating() : BigDecimal.ZERO)
+                .specialDescription(request.specialDescription())
                 .build();
         productRepository.save(product);
         return toResponse(product);
@@ -76,6 +93,7 @@ public class ProductService {
         product.setImageUrl(request.imageUrl());
         product.setMinOrderQty(request.minOrderQty());
         if (request.rating() != null) product.setRating(request.rating());
+        product.setSpecialDescription(request.specialDescription());
         productRepository.save(product);
         return toResponse(product);
     }
@@ -92,12 +110,20 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
     }
 
-    private ProductResponse toResponse(Product p) {
+    private ProductResponse toResponse(Product p, Map<Long, CycleProduct> stockMap) {
+        CycleProduct cp = stockMap.get(p.getId());
+        boolean stockConfigured = cp != null;
+        boolean soldOut = stockConfigured && Boolean.TRUE.equals(cp.getSoldOut());
         return new ProductResponse(
                 p.getId(), p.getName(), p.getDescription(),
                 p.getCategory().getId(), p.getCategory().getName(),
                 p.getUnit(), p.getPricePerUnit(), p.getImageUrl(),
-                p.getAvailable(), p.getMinOrderQty(), p.getRating()
+                p.getAvailable(), p.getMinOrderQty(), p.getRating(),
+                p.getSpecialDescription(), soldOut, stockConfigured
         );
+    }
+
+    private ProductResponse toResponse(Product p) {
+        return toResponse(p, Map.of());
     }
 }

@@ -202,6 +202,10 @@ export class AdminOrderService {
   updateStatus(id: number, status: string): Observable<any> {
     return this.http.put(`${this.base}/orders/${id}/status`, { status });
   }
+
+  adminCancel(id: number): Observable<any> {
+    return this.http.put(`${this.base}/orders/${id}/cancel`, {});
+  }
 }
 
 // ── Procurement Service ───────────────────────────────────────
@@ -286,7 +290,9 @@ export class CycleProductAdminService {
   private base = environment.apiBaseUrl;
 
   getForCycle(cycleId: number): Observable<CycleProductResponse[]> {
-    return this.http.get<CycleProductResponse[]>(`${this.base}/cycle-products/${cycleId}`);
+    return this.http.get<CycleProductResponse[]>(`${this.base}/cycle-products/${cycleId}`).pipe(
+      map(res => res ?? [])
+    );
   }
 
   getSuggestions(): Observable<StockSuggestion[]> {
@@ -299,6 +305,14 @@ export class CycleProductAdminService {
 }
 
 // ── Admin User Service ────────────────────────────────────────
+export interface UserSession {
+  issuedAt: string;
+  lastUsedAt: string;
+  expiredAt: string;
+  deviceHint: string | null;
+  activeNow: boolean;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AdminUserService {
   private http = inject(HttpClient);
@@ -318,5 +332,13 @@ export class AdminUserService {
 
   assignRole(id: number, roleId: string): Observable<any> {
     return this.http.post(`${this.base}/users/${id}/roles`, { roleId });
+  }
+
+  removeRole(id: number, roleId: string): Observable<any> {
+    return this.http.delete(`${this.base}/users/${id}/roles`, { body: { roleId } });
+  }
+
+  getSessions(id: number): Observable<UserSession[]> {
+    return this.http.get<UserSession[]>(`${this.base}/users/${id}/sessions`);
   }
 }

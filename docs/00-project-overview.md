@@ -95,14 +95,25 @@ Implemented via a `BaseEntity` JPA `@MappedSuperclass`.
 
 ---
 
+## Community Scope
+
+Currently serving **Greater Infra community**, Ameenpur-Miyapur, Hyderabad.
+
+**Supported buildings:**
+- Greater Infras Jasmine, Iris, Gardenia, Bluebells, Honesty, Aspen
+- Greater Aster, Daffodil, Carnation
+
+All within ~1.5km radius. Future expansion to other communities planned.
+
 ## MVP Scope
 
-- One gated community
+- One gated community (Greater Infra, Ameenpur)
 - One weekly ordering cycle
 - COD / UPI payments
 - Push notifications via FCM
 - Simple admin dashboard
 - Focus: operational efficiency + community trust
+- Building name validation on profile — only Greater Infra buildings accepted
 
 ---
 
@@ -128,3 +139,9 @@ Implemented via a `BaseEntity` JPA `@MappedSuperclass`.
 | 15-cloud-deployment.md | Render + Neon + SNS + UptimeRobot deployment guide |
 | 16-angular-ui-plan.md | Angular web application — phases, modules, screens |
 | 17-mobile-app-plan.md | React Native mobile app — planned after web UI |
+| 18-complete-order-flow.md | End-to-end order flow documentation |
+| 19-phase-99-improvements.md | Phase 9.9 polish — mobile responsive, reduce clicks, ratings, concurrent safety |
+| 20-phase-10-improvements.md | Phase 10 client meeting — notification banner, reorder dialog, product descriptions, user sessions |
+| 21-phase-11-improvements.md | Phase 11 — banner timings, cancel order protection, stock warnings, admin cancel, mark paid guard |
+| 22-phase-12-procurement-role.md | Phase 12 — PROCUREMENT role, email field, auto Excel email on cycle close |
+| 23-phase-13-improvements.md | Phase 13 — procurement/transport UX fixes, community validation, building allowlist, async flow analysis |

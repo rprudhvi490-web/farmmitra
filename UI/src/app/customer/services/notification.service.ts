@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export interface AppNotification {
@@ -18,7 +18,20 @@ export class NotificationService {
   private base = environment.apiBaseUrl;
 
   getMy(): Observable<AppNotification[]> {
-    return this.http.get<AppNotification[]>(`${this.base}/notifications/my`);
+    return this.http.get<any>(`${this.base}/notifications/my`).pipe(
+      map(res => {
+        if (!res) return [];
+        if (Array.isArray(res)) return res;
+        return Array.isArray(res.content) ? res.content : [];
+      })
+    );
+  }
+
+  // Only unread ORDER_UPDATE notifications — used for auto-show on home page
+  getUnreadOrderUpdates(): Observable<AppNotification[]> {
+    return this.getMy().pipe(
+      map(list => list.filter(n => !n.readStatus && n.type === 'ORDER_UPDATE'))
+    );
   }
 
   markRead(id: number): Observable<void> {

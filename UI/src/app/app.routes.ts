@@ -20,11 +20,11 @@ export const routes: Routes = [
     loadChildren: () => import('./customer/customer.routes').then(m => m.CUSTOMER_ROUTES)
   },
 
-  // Admin + Delivery routes — requires login + role check
+  // Admin + Delivery + Procurement routes — requires login + role check
   {
     path: 'admin',
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_ADMIN', 'ROLE_SUPER_ADMIN', 'ROLE_DELIVERY'] },
+    data: { roles: ['ROLE_ADMIN', 'ROLE_SUPER_ADMIN', 'ROLE_DELIVERY', 'ROLE_PROCUREMENT'] },
     loadChildren: () => import('./admin/admin.routes').then(m => m.ADMIN_ROUTES)
   },
 

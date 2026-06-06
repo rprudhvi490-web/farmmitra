@@ -85,4 +85,8 @@ export class TokenService {
   isDelivery(): boolean {
     return this.hasRole('ROLE_DELIVERY');
   }
+
+  isProcurement(): boolean {
+    return this.hasRole('ROLE_PROCUREMENT') && !this.isAdmin();
+  }
 }

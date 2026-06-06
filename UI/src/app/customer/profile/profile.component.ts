@@ -9,21 +9,48 @@ import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { TokenService } from '../../core/services/token.service';
+import { isSupportedBuilding } from '../../shared/constants/supported-buildings';
+import { Component as NgComponent } from '@angular/core';
+import { MatDialogRef } from '@angular/material/dialog';
+
+// ── Community Warning Dialog ──────────────────────────────────
+@NgComponent({
+  selector: 'app-community-warn-dialog',
+  standalone: true,
+  imports: [MatDialogModule, MatButtonModule],
+  template: `
+    <h2 mat-dialog-title>Community Not Supported</h2>
+    <mat-dialog-content>
+      <p>We are currently supporting only <strong>Greater Infra community</strong> buildings.</p>
+      <p>Supported buildings: Jasmine, Iris, Gardenia, Bluebells, Honesty, Aspen, Aster, Daffodil, Carnation.</p>
+      <p>Please check your building name. Your profile will still be saved — contact support if you need help.</p>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button mat-flat-button (click)="ref.close()">OK, Got It</button>
+    </mat-dialog-actions>
+  `
+})
+export class CommunityWarnDialogComponent {
+  ref = inject(MatDialogRef<CommunityWarnDialogComponent>);
+}
 
 @Component({
   selector: 'app-profile',
   standalone: true,
   imports: [ReactiveFormsModule, MatCardModule, MatButtonModule,
-            MatFormFieldModule, MatInputModule, MatIconModule, MatProgressSpinnerModule],
+            MatFormFieldModule, MatInputModule, MatIconModule,
+            MatProgressSpinnerModule, MatDialogModule],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss'
 })
 export class ProfileComponent implements OnInit {
   private http = inject(HttpClient);
   private snackbar = inject(MatSnackBar);
+  private dialog = inject(MatDialog);
   private router = inject(Router);
   private tokenService = inject(TokenService);
   private destroyRef = inject(DestroyRef);
@@ -67,6 +94,16 @@ export class ProfileComponent implements OnInit {
   }
 
   save(): void {
+    const block = this.form.value.block ?? '';
+    if (!isSupportedBuilding(block)) {
+      this.dialog.open(CommunityWarnDialogComponent, { width: '420px', maxWidth: '95vw' })
+        .afterClosed().subscribe(() => this.doSave());
+      return;
+    }
+    this.doSave();
+  }
+
+  private doSave(): void {
     this.saving.set(true);
     this.http.put(`${this.base}/users/me`, this.form.value).subscribe({
       next: () => {

@@ -61,8 +61,9 @@ export class AuthService {
       this.router.navigate(['/admin/dashboard']);
     } else if (this.tokenService.isDelivery()) {
       this.router.navigate(['/admin/batches']);
+    } else if (this.tokenService.isProcurement()) {
+      this.router.navigate(['/admin/procurement']);
     } else {
-      // Customer — if new user go to profile, else home
       this.router.navigate([isNewUser ? '/customer/profile' : '/customer/home']);
     }
   }

@@ -10,11 +10,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { CloudinaryService } from '../../core/services/cloudinary.service';
 import { Category } from '../categories/categories.component';
+import { ToastService } from '../../core/services/toast.service';
 
 export interface Product {
   id: number;
@@ -28,6 +28,7 @@ export interface Product {
   available: boolean;
   minOrderQty: number;
   rating: number;
+  specialDescription: string;
 }
 
 @Component({
@@ -45,7 +46,7 @@ export interface Product {
 export class AdminProductsComponent implements OnInit {
   private http = inject(HttpClient);
   private cloudinary = inject(CloudinaryService);
-  private snackbar = inject(MatSnackBar);
+  private toast = inject(ToastService);
   private destroyRef = inject(DestroyRef);
   private base = environment.apiBaseUrl;
 
@@ -60,15 +61,16 @@ export class AdminProductsComponent implements OnInit {
   columns = ['image', 'name', 'category', 'price', 'unit', 'rating', 'available', 'actions'];
 
   form = new FormGroup({
-    name:         new FormControl('', Validators.required),
-    description:  new FormControl(''),
-    categoryId:   new FormControl<number | null>(null, Validators.required),
-    unit:         new FormControl('kg', Validators.required),
-    pricePerUnit: new FormControl<number>(0, [Validators.required, Validators.min(0.01)]),
-    minOrderQty:  new FormControl<number>(0.5, Validators.required),
-    imageUrl:     new FormControl(''),
-    available:    new FormControl(true),
-    rating:       new FormControl<number>(0),
+    name:               new FormControl('', Validators.required),
+    description:        new FormControl(''),
+    specialDescription: new FormControl(''),
+    categoryId:         new FormControl<number | null>(null, Validators.required),
+    unit:               new FormControl('kg', Validators.required),
+    pricePerUnit:       new FormControl<number>(0, [Validators.required, Validators.min(0.01)]),
+    minOrderQty:        new FormControl<number>(0.5, Validators.required),
+    imageUrl:           new FormControl(''),
+    available:          new FormControl(true),
+    rating:             new FormControl<number>(0),
   });
 
   ngOnInit(): void {
@@ -85,13 +87,13 @@ export class AdminProductsComponent implements OnInit {
 
   openCreate(): void {
     this.editingId.set(null);
-    this.form.reset({ name: '', description: '', categoryId: null, unit: 'kg', pricePerUnit: 0, minOrderQty: 0.5, imageUrl: '', available: true, rating: 0 });
+    this.form.reset({ name: '', description: '', specialDescription: '', categoryId: null, unit: 'kg', pricePerUnit: 0, minOrderQty: 0.5, imageUrl: '', available: true, rating: 0 });
     this.showForm.set(true);
   }
 
   openEdit(p: Product): void {
     this.editingId.set(p.id);
-    this.form.setValue({ name: p.name, description: p.description ?? '', categoryId: p.categoryId, unit: p.unit, pricePerUnit: p.pricePerUnit, minOrderQty: p.minOrderQty, imageUrl: p.imageUrl ?? '', available: p.available, rating: p.rating ?? 0 });
+    this.form.setValue({ name: p.name, description: p.description ?? '', specialDescription: p.specialDescription ?? '', categoryId: p.categoryId, unit: p.unit, pricePerUnit: p.pricePerUnit, minOrderQty: p.minOrderQty, imageUrl: p.imageUrl ?? '', available: p.available, rating: p.rating ?? 0 });
     this.showForm.set(true);
   }
 
@@ -103,9 +105,9 @@ export class AdminProductsComponent implements OnInit {
       next: url => {
         this.form.patchValue({ imageUrl: url });
         this.uploading.set(false);
-        this.snackbar.open('Image uploaded!', 'Close', { duration: 2000 });
+        this.toast.success('Image uploaded!');
       },
-      error: () => { this.uploading.set(false); this.snackbar.open('Upload failed', 'Close', { duration: 3000 }); }
+      error: () => { this.uploading.set(false); this.toast.error('Image upload failed.'); }
     });
   }
 
@@ -117,14 +119,14 @@ export class AdminProductsComponent implements OnInit {
       ? this.http.put(`${this.base}/products/${this.editingId()}`, req)
       : this.http.post(`${this.base}/products`, req);
     call.subscribe({
-      next: () => { this.saving.set(false); this.showForm.set(false); this.snackbar.open(this.editingId() ? 'Updated!' : 'Created!', 'Close', { duration: 2000 }); this.load(); },
+      next: () => { this.saving.set(false); this.showForm.set(false); this.toast.success(this.editingId() ? 'Product updated!' : 'Product created!'); this.load(); },
       error: () => this.saving.set(false)
     });
   }
 
   toggleAvailability(p: Product): void {
     this.http.put(`${this.base}/products/${p.id}/availability`, { available: !p.available })
-      .subscribe({ next: () => { this.snackbar.open(`${p.name} ${!p.available ? 'enabled' : 'disabled'}`, 'Close', { duration: 2000 }); this.load(); } });
+      .subscribe({ next: () => { this.toast.success(`${p.name} ${!p.available ? 'enabled' : 'disabled'}.`); this.load(); } });
   }
 
   cancel(): void { this.showForm.set(false); }

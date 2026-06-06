@@ -9,13 +9,13 @@ import { MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import {
   AdminCycleService, WeeklyCycle,
   CycleProductAdminService, CycleProductResponse, StockSuggestion
 } from '../services/admin.services';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-cycle-stock',
@@ -32,7 +32,7 @@ import {
 export class CycleStockComponent implements OnInit {
   private cycleService = inject(AdminCycleService);
   private stockService = inject(CycleProductAdminService);
-  private snackbar = inject(MatSnackBar);
+  private toast = inject(ToastService);
 
   cycles = signal<WeeklyCycle[]>([]);
   selectedCycleId = signal<number | null>(null);
@@ -56,8 +56,8 @@ export class CycleStockComponent implements OnInit {
       .pipe(catchError(() => of([] as WeeklyCycle[])))
       .subscribe({
         next: cycles => {
-          this.cycles.set(cycles);
-          const target = cycles.find(c => c.status === 'OPEN') ?? cycles[0];
+          this.cycles.set([...cycles].reverse());
+          const target = cycles.find(c => c.status === 'OPEN') ?? cycles[cycles.length - 1];
           if (target) { this.selectedCycleId.set(target.id); this.load(target.id); }
         }
       });
@@ -117,7 +117,7 @@ export class CycleStockComponent implements OnInit {
       .map(([productId, maxStock]) => ({ productId: Number(productId), maxStock: Number(maxStock) }));
 
     if (!items.length) {
-      this.snackbar.open('No stock limits to save.', 'Close', { duration: 2000 });
+      this.toast.warning('No stock limits to save.');
       return;
     }
 
@@ -130,7 +130,7 @@ export class CycleStockComponent implements OnInit {
           rows.forEach(r => this.editValues[r.productId] = r.maxStock);
           this.updateDisplayRows();
           this.saving.set(false);
-          this.snackbar.open('Stock limits saved!', 'Close', { duration: 2500 });
+          this.toast.success('Stock limits saved!');
         },
         error: () => this.saving.set(false)
       });
@@ -142,6 +142,6 @@ export class CycleStockComponent implements OnInit {
         this.editValues[s.productId] = s.suggestedMaxStock;
       }
     });
-    this.snackbar.open('Suggestions applied — review and save.', 'Close', { duration: 2500 });
+    this.toast.info('Suggestions applied — review and save.');
   }
 }

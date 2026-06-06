@@ -1,5 +1,5 @@
 import { Component, inject, signal, computed, OnInit, OnDestroy, DestroyRef } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -13,12 +13,13 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { CycleService, ProductService, Product, Category, WeeklyCycle } from '../services/customer.services';
 import { CartService } from '../services/cart.service';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-home',
   standalone: true,
   imports: [
-    CommonModule, RouterLink, ReactiveFormsModule,
+    CommonModule, ReactiveFormsModule,
     MatCardModule, MatButtonModule, MatIconModule,
     MatProgressSpinnerModule, MatFormFieldModule, MatInputModule
   ],
@@ -29,9 +30,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   private cycleService = inject(CycleService);
   private productService = inject(ProductService);
   private cartService = inject(CartService);
-  private snackbar = inject(MatSnackBar);
-  private router = inject(Router);
-  private destroyRef = inject(DestroyRef);
+  private toast        = inject(ToastService);
+  private router       = inject(Router);
+  private destroyRef   = inject(DestroyRef);
 
   cycle = signal<WeeklyCycle | null>(null);
   categories = signal<Category[]>([]);
@@ -125,6 +126,19 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   addToCart(product: Product): void {
+    const cycleStatus = this.cycle()?.status;
+    if (!cycleStatus || cycleStatus !== 'OPEN') {
+      this.toast.warning('Orders are currently closed — we will open again next Monday at 9 AM');
+      return;
+    }
+    if (!product.stockConfigured) {
+      this.toast.warning('Stock limit not configured for this item yet — please check back shortly');
+      return;
+    }
+    if (product.soldOut) {
+      this.toast.warning('Stock Reached Limit — kindly try again later');
+      return;
+    }
     const qty = this.getQty(product.id);
     this.cartService.addOrUpdate({
       productId: product.id,
@@ -134,8 +148,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       quantity: qty,
       minOrderQty: product.minOrderQty
     });
-    this.snackbar.open(`${product.name} added to cart`, 'View Cart', { duration: 2500 })
-      .onAction().subscribe(() => this.router.navigate(['/customer/cart']));
+    this.toast.success(`${product.name} added to cart`);
   }
 
   isInCart(productId: number): boolean {

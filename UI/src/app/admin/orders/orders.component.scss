@@ -8,6 +8,9 @@
 .status-select { min-width: 120px; font-size: 13px; }
 .pay-btn { color: #1565c0; border-color: #1565c0; font-size: 12px; }
 .paid-label { color: #2e7d32; font-weight: 600; font-size: 13px; }
+.pay-pending { color: #9e9e9e; font-size: 12px; font-style: italic; }
+.cancel-btn { color: #c62828 !important; }
+.status-final { color: #9e9e9e; font-size: 13px; }
 
 @media (max-width: 600px) {
   .cycle-select { min-width: unset; width: 100%; }

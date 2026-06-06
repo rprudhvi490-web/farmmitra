@@ -47,4 +47,7 @@ public class Product extends BaseEntity {
     @Column(name = "rating", precision = 2, scale = 1)
     @Builder.Default
     private BigDecimal rating = BigDecimal.ZERO;
+
+    @Column(name = "special_description", columnDefinition = "TEXT")
+    private String specialDescription;
 }

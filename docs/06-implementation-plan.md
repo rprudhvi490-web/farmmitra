@@ -121,3 +121,29 @@
 - [ ] Android + iOS builds
 - [ ] FCM push notification integration
 - [ ] App store deployment
+
+---
+
+## Phase 11 — Operational Improvements 🔴 In Progress
+
+### Completed
+- [x] Banner auto-close: success 5s, error 10s, both manually closable
+- [x] Error toast de-duplication (replaces existing error on new error)
+- [x] Admin orders — default to latest cycle
+- [x] Cycle-stock — cycle select descending
+- [x] Customer cancel order — disabled with support message when cycle not OPEN
+- [x] Backend guard on customer cancel — rejects if cycle not OPEN
+- [x] Admin cancel order — any state before DELIVERED via dedicated endpoint
+- [x] Cart stock warnings — sold out / not configured / cycle closed messages
+- [x] Reorder dialog — live stock checks + cycle closed block
+- [x] Special description tagline color: red → green
+- [x] Remove Re-Open button from closed cycles in admin UI
+- [x] Mark Paid button — only shown after order is DELIVERED
+- [x] Customer orders list — show cycle label alongside order date
+
+### Pending
+- [ ] PROCUREMENT role — new role for field procurement staff
+- [ ] Email field on user profile
+- [ ] Auto email procurement Excel to PROCUREMENT users on cycle close
+- [ ] Procurement UI accessible to PROCUREMENT role
+- [ ] Dashboard `/history` + `/customers` Angular UI (partially done)

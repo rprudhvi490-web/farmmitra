@@ -14,8 +14,9 @@
     </button>
     <button mat-flat-button class="mark-all-btn"
             (click)="markAllProcured()"
-            [disabled]="markingAll() || !sheet() || sheet()!.items.length === 0">
-      @if (markingAll()) { <mat-spinner diameter="18" /> } @else { <mat-icon>done_all</mat-icon> Mark All Procured }
+            [disabled]="markingAll() || !sheet() || sheet()!.items.length === 0 || allProcured() || !isLatestCycle()"
+            [title]="allProcured() ? 'All items already procured' : !isLatestCycle() ? 'Only available for latest cycle' : ''">
+      @if (markingAll()) { <mat-spinner diameter="18" /> } @else { <ng-container><mat-icon>done_all</mat-icon> {{ allProcured() ? 'All Procured ✓' : 'Mark All Procured' }}</ng-container> }
     </button>
   </div>
 </div>

@@ -36,6 +36,9 @@ export interface Product {
   available: boolean;
   minOrderQty: number;
   rating: number;
+  specialDescription: string;
+  soldOut: boolean;
+  stockConfigured: boolean;
 }
 
 export interface OrderItem {
@@ -53,6 +56,7 @@ export interface CustomerOrder {
   orderNumber: string;
   cycleId: number;
   cycleLabel: string;
+  cycleStatus: string;
   status: string;
   totalAmount: number;
   referralDiscount: number;
@@ -126,7 +130,7 @@ export class OrderService {
     return this.http.get<CustomerOrder>(`${this.base}/orders/my/${id}`);
   }
 
-  cancel(id: number): Observable<void> {
-    return this.http.put<void>(`${this.base}/orders/${id}/cancel`, {});
+  cancel(id: number): Observable<CustomerOrder> {
+    return this.http.put<CustomerOrder>(`${this.base}/orders/my/${id}/cancel`, {});
   }
 }

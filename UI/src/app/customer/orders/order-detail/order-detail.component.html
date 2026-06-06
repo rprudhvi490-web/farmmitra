@@ -87,9 +87,26 @@
 
     <!-- Cancel -->
     @if (o.status === 'PLACED') {
-      <button mat-stroked-button class="cancel-btn" [disabled]="cancelling()" (click)="cancel()">
-        @if (cancelling()) { <mat-spinner diameter="18" /> } @else { Cancel Order }
-      </button>
+      @if (o.cycleStatus === 'OPEN') {
+        <div class="cancel-info">
+          <mat-icon>info</mat-icon>
+          <span>You can cancel this order anytime before the ordering cycle closes (Wednesday 2 PM).</span>
+        </div>
+        <button mat-stroked-button class="cancel-btn" [disabled]="cancelling()" (click)="cancel()">
+          @if (cancelling()) { <mat-spinner diameter="18" /> } @else { Cancel Order }
+        </button>
+      } @else {
+        <div class="cancel-blocked">
+          <button mat-stroked-button class="cancel-btn" disabled>
+            <mat-icon>block</mat-icon> Cancel Order
+          </button>
+          <p class="cancel-note">
+            Procurement is started, you cannot cancel this order right now.
+            To cancel, kindly call customer support:
+            <a href="tel:+919999999999" class="support-number">+91-99999-99999</a>
+          </p>
+        </div>
+      }
     }
   }
 </div>

@@ -37,6 +37,7 @@ public class OrderDto {
             String orderNumber,
             Long cycleId,
             String cycleLabel,
+            String cycleStatus,
             String status,
             String deliverySlot,
             BigDecimal totalAmount,

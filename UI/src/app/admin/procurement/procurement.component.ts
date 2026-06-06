@@ -9,9 +9,9 @@ import { MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ProcurementService, ProcurementSheet, ProcurementItem, AdminCycleService, WeeklyCycle } from '../services/admin.services';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-procurement',
@@ -28,7 +28,7 @@ import { ProcurementService, ProcurementSheet, ProcurementItem, AdminCycleServic
 export class ProcurementComponent implements OnInit {
   private procurementService = inject(ProcurementService);
   private cycleService = inject(AdminCycleService);
-  private snackbar = inject(MatSnackBar);
+  private toast = inject(ToastService);
   private destroyRef = inject(DestroyRef);
 
   cycles = signal<WeeklyCycle[]>([]);
@@ -47,9 +47,10 @@ export class ProcurementComponent implements OnInit {
     this.cycleService.getAll()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(c => {
-        this.cycles.set(c);
-        const closed = c.find(x => x.status !== 'OPEN');
-        const target = closed ?? c[0];
+        const sorted = [...c].reverse();
+        this.cycles.set(sorted);
+        const closed = sorted.find(x => x.status !== 'OPEN');
+        const target = closed ?? sorted[0];
         if (target) { this.selectedCycleId.set(target.id); this.loadSheet(target.id); }
       });
   }
@@ -61,6 +62,7 @@ export class ProcurementComponent implements OnInit {
       .subscribe({
         next: s => {
           this.sheet.set(s);
+          this.markingAll.set(false); // clear after reload so button re-evaluates with fresh editValues
           this.loading.set(false);
           s.items.forEach(i => {
             this.editValues[i.productId] = {
@@ -71,7 +73,7 @@ export class ProcurementComponent implements OnInit {
             };
           });
         },
-        error: () => this.loading.set(false)
+        error: () => { this.loading.set(false); this.markingAll.set(false); }
       });
   }
 
@@ -83,18 +85,29 @@ export class ProcurementComponent implements OnInit {
   save(item: ProcurementItem): void {
     const val = this.editValues[item.productId];
     this.procurementService.update(this.selectedCycleId()!, item.id, val).subscribe({
-      next: () => this.snackbar.open('Saved!', 'Close', { duration: 2000 })
+      next: () => this.toast.success('Saved!')
     });
   }
 
+  allProcured(): boolean {
+    const s = this.sheet();
+    if (!s || s.items.length === 0) return false;
+    // Read from editValues — always reflects the latest saved state
+    return s.items.every(i => this.editValues[i.productId]?.status === 'PROCURED');
+  }
+
+  isLatestCycle(): boolean {
+    const cycles = this.cycles();
+    return cycles.length > 0 && this.selectedCycleId() === cycles[0].id;
+  }
+
   markAllProcured(): void {
-    if (!this.selectedCycleId()) return;
+    if (!this.selectedCycleId() || this.markingAll() || this.allProcured()) return;
     this.markingAll.set(true);
     this.procurementService.markAllProcured(this.selectedCycleId()!).subscribe({
       next: () => {
-        this.markingAll.set(false);
-        this.snackbar.open('All items marked as PROCURED. GOODS_LOADED triggered.', 'Close', { duration: 3000 });
-        this.loadSheet(this.selectedCycleId()!);
+        this.toast.success('All items marked as PROCURED. GOODS_LOADED triggered.');
+        this.loadSheet(this.selectedCycleId()!); // markingAll stays true until loadSheet completes
       },
       error: () => this.markingAll.set(false)
     });

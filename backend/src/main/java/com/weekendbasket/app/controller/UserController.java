@@ -71,4 +71,17 @@ public class UserController {
         userService.assignRole(id, request.roleId());
         return ResponseEntity.noContent().build();
     }
+
+    @DeleteMapping("/{id}/roles")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> removeRole(@PathVariable Long id, @Valid @RequestBody RemoveRoleRequest request) {
+        userService.removeRole(id, request.roleId());
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/sessions")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<SessionResponse>> getSessions(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.getActiveSessions(id));
+    }
 }

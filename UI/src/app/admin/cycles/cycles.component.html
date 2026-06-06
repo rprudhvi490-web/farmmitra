@@ -85,9 +85,6 @@
         <th mat-header-cell *matHeaderCellDef>Actions</th>
         <td mat-cell *matCellDef="let c">
           <div class="action-btns">
-            @if (c.status === 'CLOSED') {
-              <button mat-stroked-button class="open-btn" (click)="open(c.id)">Re-Open</button>
-            }
             @if (c.status === 'OPEN') {
               <button mat-stroked-button class="close-btn" (click)="close(c.id)">Close</button>
             }

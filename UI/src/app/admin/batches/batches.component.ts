@@ -9,12 +9,9 @@ import { MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { AdminCycleService, WeeklyCycle, AdminOrderService, AdminOrder, AdminUserService, AdminUser } from '../services/admin.services';
 
 interface Batch {
   id: number;
@@ -80,8 +77,9 @@ export class BatchesComponent implements OnInit {
     this.cycleService.getAll()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(c => {
-        this.cycles.set(c);
-        if (c.length > 0) { this.selectedCycleId.set(c[0].id); this.loadData(c[0].id); }
+        const sorted = [...c].reverse();
+        this.cycles.set(sorted);
+        if (sorted.length > 0) { this.selectedCycleId.set(sorted[0].id); this.loadData(sorted[0].id); }
       });
 
     // Load delivery staff

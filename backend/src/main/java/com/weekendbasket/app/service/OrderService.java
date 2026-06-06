@@ -109,10 +109,26 @@ public class OrderService {
         if (!order.getUser().getId().equals(user.getId())) {
             throw new WeekendBasketException("Access denied.");
         }
+        if (!"OPEN".equalsIgnoreCase(order.getCycle().getStatus())) {
+            throw new WeekendBasketException(
+                    "Procurement has started. To cancel your order, please call customer support.");
+        }
         stateTransitionWorker.apply("ORDER", order.getStatus(), "CANCELLED", "CUSTOMER_CANCEL");
         order.setStatus("CANCELLED");
         orderRepository.save(order);
         // Release reserved stock back to cycle
+        List<OrderItem> items = orderItemRepository.findByOrderId(orderId);
+        items.forEach(i -> cycleProductService.releaseStock(
+                order.getCycle().getId(), i.getProduct().getId(), i.getQuantity()));
+        return toResponse(order, items);
+    }
+
+    @Transactional
+    public OrderResponse adminCancelOrder(Long orderId) {
+        CustomerOrder order = findOrder(orderId);
+        stateTransitionWorker.apply("ORDER", order.getStatus(), "CANCELLED", "ADMIN_CANCEL");
+        order.setStatus("CANCELLED");
+        orderRepository.save(order);
         List<OrderItem> items = orderItemRepository.findByOrderId(orderId);
         items.forEach(i -> cycleProductService.releaseStock(
                 order.getCycle().getId(), i.getProduct().getId(), i.getQuantity()));
@@ -188,6 +204,7 @@ public class OrderService {
         return new OrderResponse(
                 o.getId(), o.getOrderNumber(),
                 o.getCycle().getId(), o.getCycle().getCycleLabel(),
+                o.getCycle().getStatus(),
                 o.getStatus(), o.getDeliverySlot(),
                 o.getTotalAmount(), o.getReferralDiscount(), o.getAmountToCollect(),
                 o.getPaymentMethod(), o.getPaymentStatus(), o.getNotes(), itemResponses);

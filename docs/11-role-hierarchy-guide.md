@@ -10,6 +10,7 @@ Same pattern as ElderCare — role hierarchy lives in `SecurityConfig.java`.
 RoleHierarchy roleHierarchy() {
     return RoleHierarchyImpl.fromHierarchy("""
         ROLE_SUPER_ADMIN > ROLE_ADMIN
+        ROLE_ADMIN > ROLE_PROCUREMENT
         ROLE_ADMIN > ROLE_DELIVERY
         ROLE_ADMIN > ROLE_CUSTOMER
     """);
@@ -38,12 +39,13 @@ DELIVERY and CUSTOMER are at the same level — neither inherits from the other.
 
 ## Role Descriptions
 
-| Role             | Who                  | What they can do                              |
-|------------------|----------------------|-----------------------------------------------|
-| ROLE_SUPER_ADMIN | Platform owner       | Everything — create communities, manage admins|
-| ROLE_ADMIN       | Community owner/ops  | Products, orders, procurement, delivery mgmt  |
-| ROLE_DELIVERY    | Delivery staff       | View assigned batches, mark orders delivered  |
-| ROLE_CUSTOMER    | Community members    | Browse products, place orders, track delivery |
+| Role               | Who                      | What they can do                                          |
+|--------------------|--------------------------|-----------------------------------------------------------|
+| ROLE_SUPER_ADMIN   | Platform owner           | Everything — create communities, manage admins             |
+| ROLE_ADMIN         | Community owner/ops      | Products, orders, procurement, delivery mgmt              |
+| ROLE_PROCUREMENT   | Procurement staff        | View procurement sheet, update vendor info, mark procured, receive Excel by email |
+| ROLE_DELIVERY      | Delivery staff           | View assigned batches, mark orders delivered              |
+| ROLE_CUSTOMER      | Community members        | Browse products, place orders, track delivery             |
 
 ---
 
@@ -122,8 +124,44 @@ A role can exist in DB without being in the hierarchy — it works, just no inhe
 
 ---
 
+## PROCUREMENT Role — New (Phase 11)
+
+### Who
+Field procurement staff — people who physically go to Kadapa market to purchase goods. They are not admins but need access to the procurement sheet.
+
+### What they can do
+- View procurement sheet for current cycle
+- Update vendor name, vendor notes, procured qty per item
+- Mark items as PROCURED
+- Receive Excel export by email automatically when cycle closes
+
+### What they cannot do
+- Manage products, categories, users, cycles, orders
+- Access admin dashboard
+- Manage delivery batches
+
+### User setup
+- Admin creates procurement users via admin users page
+- Each procurement user has an **email address** (new field on user profile)
+- On cycle close, system emails the procurement Excel to all users with ROLE_PROCUREMENT
+- Email service: free tier (SendGrid free / JavaMailSender + Gmail SMTP)
+
+### Implementation needed
+- Add `ROLE_PROCUREMENT` to `SecurityConfig` hierarchy: `ROLE_ADMIN > ROLE_PROCUREMENT`
+- Add `email` field to `user_profile` table
+- New `V8__add_user_email.sql` migration
+- `UserProfile.java` + `UserProfileDto.java` — add email field
+- `ProcurementController` endpoints — add `hasAnyRole('ADMIN', 'PROCUREMENT')` guards
+- Email service: `ProcurementEmailService.java` — sends Excel attachment to all PROCUREMENT users
+- Trigger: `CycleClosedEventListener` — after aggregation, call email service
+- Admin UI — user creation form add email field
+- Procurement UI — accessible to PROCUREMENT role users (separate simple layout or shared admin layout with restricted nav)
+
+---
+
 ## OTP-Only Auth Note
 
 Unlike ElderCare (username/password), WeekendBasket uses OTP.
 Admin accounts are created directly by SUPER_ADMIN — no OTP flow for admin creation.
 Customer accounts are auto-created on first OTP verification.
+Procurement staff accounts created by ADMIN — they log in via phone OTP like any other user.

@@ -82,6 +82,12 @@ public class OrderController {
         return ResponseEntity.ok(orderService.assignDeliverySlot(orderId, slot));
     }
 
+    @PutMapping("/{orderId}/cancel")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<OrderResponse> adminCancelOrder(@PathVariable Long orderId) {
+        return ResponseEntity.ok(orderService.adminCancelOrder(orderId));
+    }
+
     @PutMapping("/{orderId}/payment")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> markPaid(@PathVariable Long orderId) {

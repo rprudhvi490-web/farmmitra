@@ -7,11 +7,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { AdminCycleService, WeeklyCycle, AdminOrderService, AdminOrder } from '../services/admin.services';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-admin-orders',
@@ -27,7 +27,7 @@ export class AdminOrdersComponent implements OnInit {
   private cycleService = inject(AdminCycleService);
   private orderService = inject(AdminOrderService);
   private http = inject(HttpClient);
-  private snackbar = inject(MatSnackBar);
+  private toast = inject(ToastService);
   private destroyRef = inject(DestroyRef);
   private base = environment.apiBaseUrl;
 
@@ -36,15 +36,15 @@ export class AdminOrdersComponent implements OnInit {
   selectedCycleId = signal<number | null>(null);
   loading = signal(false);
 
-  columns = ['orderNumber', 'phone', 'status', 'payment', 'total', 'slot', 'actions'];
-  statusOptions = ['PLACED', 'CONFIRMED', 'PACKED', 'DELIVERED', 'CANCELLED'];
+  columns = ['orderNumber', 'phone', 'status', 'payment', 'total', 'slot', 'actions', 'cancel'];
+  statusOptions = ['PLACED', 'CONFIRMED', 'PACKED', 'DELIVERED'];
 
   ngOnInit(): void {
     this.cycleService.getAll()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(c => {
         this.cycles.set(c);
-        if (c.length > 0) { this.selectedCycleId.set(c[0].id); this.loadOrders(c[0].id); }
+        if (c.length > 0) { const latest = c[c.length - 1]; this.selectedCycleId.set(latest.id); this.loadOrders(latest.id); }
       });
   }
 
@@ -64,13 +64,21 @@ export class AdminOrdersComponent implements OnInit {
 
   updateStatus(orderId: number, status: string): void {
     this.orderService.updateStatus(orderId, status).subscribe({
-      next: () => { this.snackbar.open('Status updated!', 'Close', { duration: 2000 }); this.loadOrders(this.selectedCycleId()!); }
+      next: () => { this.toast.success('Status updated!'); this.loadOrders(this.selectedCycleId()!); },
+      error: (err) => this.toast.error(err?.error?.message ?? 'Failed to update status')
+    });
+  }
+
+  cancelOrder(orderId: number): void {
+    this.orderService.adminCancel(orderId).subscribe({
+      next: () => { this.toast.success('Order cancelled.'); this.loadOrders(this.selectedCycleId()!); },
+      error: (err) => this.toast.error(err?.error?.message ?? 'Failed to cancel order')
     });
   }
 
   markPaid(orderId: number): void {
     this.http.put(`${this.base}/orders/${orderId}/payment`, {}).subscribe({
-      next: () => { this.snackbar.open('Marked as Paid!', 'Close', { duration: 2000 }); this.loadOrders(this.selectedCycleId()!); }
+      next: () => { this.toast.success('Marked as Paid!'); this.loadOrders(this.selectedCycleId()!); }
     });
   }
 
