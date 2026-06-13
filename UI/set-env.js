@@ -5,16 +5,19 @@ const path = require('path');
 const devPath = path.join(__dirname, './src/environments/environment.ts');
 const prodPath = path.join(__dirname, './src/environments/environment.prod.ts');
 
-// Ensure the directory exists (just in case)
+// Ensure the directory exists
 const dir = path.join(__dirname, './src/environments');
 if (!fs.existsSync(dir)){
     fs.mkdirSync(dir, { recursive: true });
 }
 
-// Environment file blueprint reading straight from Netlify's system environment variables
+// Match your EXACT application structure perfectly
 const envConfigFile = `export const environment = {
   production: true,
-  firebaseConfig: {
+  apiBaseUrl: 'https://farmmitra-backend.onrender.com/weekendbasket/api',
+  notificationDurationMs: 7000,
+  notificationErrorDurationMs: 12000,
+  firebase: {
     apiKey: '${process.env.FIREBASE_API_KEY || ""}',
     authDomain: '${process.env.FIREBASE_AUTH_DOMAIN || ""}',
     projectId: '${process.env.FIREBASE_PROJECT_ID || ""}',
@@ -25,8 +28,8 @@ const envConfigFile = `export const environment = {
 };
 `;
 
-// Write to BOTH locations so the build handles cross-references flawlessly
+// Write to both locations so the compiler finds all expected fields
 fs.writeFileSync(devPath, envConfigFile, 'utf8');
 fs.writeFileSync(prodPath, envConfigFile, 'utf8');
 
-console.log('Angular environment files generated dynamically for both dev and prod targets.');
+console.log('Angular environment targets cleanly generated with complete API parameters.');
