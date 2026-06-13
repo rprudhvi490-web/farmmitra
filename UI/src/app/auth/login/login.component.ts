@@ -42,17 +42,21 @@ export class LoginComponent {
   passwordLoading = signal(false);
   showPassword = signal(false);
 
-  sendOtp(): void {
-    if (this.phone.invalid) { this.phone.markAsTouched(); return; }
-    this.loading.set(true);
-    this.authService.sendOtp(this.phone.value!).subscribe({
-      next: () => {
-        this.loading.set(false);
-        this.router.navigate(['/auth/verify'], { state: { phone: this.phone.value } });
-      },
-      error: () => this.loading.set(false)
-    });
+  async sendOtp(): Promise<void> {
+
+  if (this.phone.invalid) { this.phone.markAsTouched(); return; }
+  this.loading.set(true);
+  try {
+    const rawNumber = this.phone.value; // e.g., "9876543210"
+  
+    await this.authService.sendFirebaseOtp(rawNumber!);
+    this.loading.set(false);
+    this.router.navigate(['/auth/verify'], { state: { phone: this.phone.value } });
+  } catch (err: any) {
+    this.loading.set(false);
+    console.error('Firebase OTP error', err);
   }
+}
 
   loginWithPassword(): void {
     if (this.passwordForm.invalid) { this.passwordForm.markAllAsTouched(); return; }

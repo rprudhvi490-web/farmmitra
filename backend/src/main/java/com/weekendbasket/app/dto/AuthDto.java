@@ -7,6 +7,11 @@ import jakarta.validation.constraints.Size;
 import java.util.List;
 
 public class AuthDto {
+	
+	public record FirebaseLoginRequest(
+		    @NotBlank(message = "Firebase token is required") String token,
+		    String referralCode
+		) {}
 
     public record SendOtpRequest(
             @NotBlank(message = "Phone number is required")

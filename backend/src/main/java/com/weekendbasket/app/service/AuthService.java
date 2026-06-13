@@ -12,6 +12,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseToken;
+
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -26,7 +29,7 @@ public class AuthService {
 
     private static final Logger log = LogManager.getLogger(AuthService.class);
 
-    private final OtpService otpService;
+//    private final OtpService otpService;
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
     private final UserProfileRepository profileRepository;
@@ -45,39 +48,39 @@ public class AuthService {
 
     // ── OTP flow ──────────────────────────────────────────────────────────────
 
-    public SendOtpResponse sendOtp(String phoneNumber) {
-        otpService.generateAndSaveOtp(phoneNumber);
-        return new SendOtpResponse("OTP sent successfully", phoneNumber);
-    }
-
-    @Transactional
-    public AuthResponse verifyOtp(VerifyOtpRequest request) {
-        otpService.verifyOtp(request.phoneNumber(), request.otp());
-
-        boolean isNewUser = !userRepository.existsByPhoneNumber(request.phoneNumber());
-        User user;
-
-        if (isNewUser) {
-            user = registerNewUser(request.phoneNumber());
-            if (request.referralCode() != null && !request.referralCode().isBlank()) {
-                try {
-                    referralService.applyReferral(request.phoneNumber(), request.referralCode());
-                } catch (Exception e) {
-                    log.warn("Referral apply failed for {}: {}", request.phoneNumber(), e.getMessage());
-                }
-            }
-        } else {
-            user = userRepository.findByPhoneNumber(request.phoneNumber()).orElseThrow();
-        }
-
-        // OTP login → 10 hour token
-        List<String> roles = loadRoles(user.getId());
-        String token = jwtUtil.generateToken(user.getPhoneNumber(), roles, otpExpiryMs);
-        saveTokenRecord(user, token, otpExpiryMs, null);
-
-        return new AuthResponse(token, otpExpiryMs, user.getPhoneNumber(),
-                user.getUsername(), roles, isNewUser, user.getHasPassword());
-    }
+//    public SendOtpResponse sendOtp(String phoneNumber) {
+//        otpService.generateAndSaveOtp(phoneNumber);
+//        return new SendOtpResponse("OTP sent successfully", phoneNumber);
+//    }
+//
+//    @Transactional
+//    public AuthResponse verifyOtp(VerifyOtpRequest request) {
+//        otpService.verifyOtp(request.phoneNumber(), request.otp());
+//
+//        boolean isNewUser = !userRepository.existsByPhoneNumber(request.phoneNumber());
+//        User user;
+//
+//        if (isNewUser) {
+//            user = registerNewUser(request.phoneNumber());
+//            if (request.referralCode() != null && !request.referralCode().isBlank()) {
+//                try {
+//                    referralService.applyReferral(request.phoneNumber(), request.referralCode());
+//                } catch (Exception e) {
+//                    log.warn("Referral apply failed for {}: {}", request.phoneNumber(), e.getMessage());
+//                }
+//            }
+//        } else {
+//            user = userRepository.findByPhoneNumber(request.phoneNumber()).orElseThrow();
+//        }
+//
+//        // OTP login → 10 hour token
+//        List<String> roles = loadRoles(user.getId());
+//        String token = jwtUtil.generateToken(user.getPhoneNumber(), roles, otpExpiryMs);
+//        saveTokenRecord(user, token, otpExpiryMs, null);
+//
+//        return new AuthResponse(token, otpExpiryMs, user.getPhoneNumber(),
+//                user.getUsername(), roles, isNewUser, user.getHasPassword());
+//    }
 
     // ── Password flow ─────────────────────────────────────────────────────────
 
@@ -186,4 +189,53 @@ public class AuthService {
             log.warn("Failed to save token record: {}", e.getMessage());
         }
     }
+    
+    @Transactional
+    public AuthResponse firebaseLogin(FirebaseLoginRequest request) {
+        try {
+            // Verify token with Firebase — throws if invalid/expired
+            FirebaseToken decoded = FirebaseAuth.getInstance().verifyIdToken(request.token());
+            // Firebase stores phone as "+919876543210" in token claims
+            Object rawPhoneObj = decoded.getClaims().get("phone_number");
+            if (!(rawPhoneObj instanceof String rawPhone)) {
+                throw new WeekendBasketException("Firebase token does not contain a phone number.");
+            }
+            String phoneNumber = rawPhone.startsWith("+91") ? rawPhone.substring(3) : rawPhone;
+
+            boolean isNewUser = !userRepository.existsByPhoneNumber(phoneNumber);
+            User user;
+
+            if (isNewUser) {
+                user = registerNewUser(phoneNumber);
+                if (request.referralCode() != null && !request.referralCode().isBlank()) {
+                    try {
+                        referralService.applyReferral(phoneNumber, request.referralCode());
+                    } catch (Exception e) {
+                        log.warn("Referral apply failed for {}: {}", phoneNumber, e.getMessage());
+                    }
+                }
+            } else {
+                user = userRepository.findByPhoneNumber(phoneNumber).orElseThrow();
+            }
+
+            if (!"ACTIVE".equals(user.getStatus())) {
+                throw new WeekendBasketException("Your account is blocked. Please contact support.");
+            }
+
+            List<String> roles = loadRoles(user.getId());
+            String token = jwtUtil.generateToken(user.getPhoneNumber(), roles, otpExpiryMs);
+            saveTokenRecord(user, token, otpExpiryMs, null);
+
+            log.info("Firebase login success: {}", phoneNumber);
+            return new AuthResponse(token, otpExpiryMs, user.getPhoneNumber(),
+                    user.getUsername(), roles, isNewUser, user.getHasPassword());
+
+        } catch (WeekendBasketException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Firebase token verification failed: {}", e.getMessage());
+            throw new WeekendBasketException("Invalid or expired Firebase token.");
+        }
+    }
+    
 }

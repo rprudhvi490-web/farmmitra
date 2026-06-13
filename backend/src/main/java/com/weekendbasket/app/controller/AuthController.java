@@ -16,15 +16,15 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @PostMapping("/send-otp")
-    public ResponseEntity<SendOtpResponse> sendOtp(@Valid @RequestBody SendOtpRequest request) {
-        return ResponseEntity.ok(authService.sendOtp(request.phoneNumber()));
-    }
-
-    @PostMapping("/verify-otp")
-    public ResponseEntity<AuthResponse> verifyOtp(@Valid @RequestBody VerifyOtpRequest request) {
-        return ResponseEntity.ok(authService.verifyOtp(request));
-    }
+//    @PostMapping("/send-otp")
+//    public ResponseEntity<SendOtpResponse> sendOtp(@Valid @RequestBody SendOtpRequest request) {
+//        return ResponseEntity.ok(authService.sendOtp(request.phoneNumber()));
+//    }
+//
+//    @PostMapping("/verify-otp")
+//    public ResponseEntity<AuthResponse> verifyOtp(@Valid @RequestBody VerifyOtpRequest request) {
+//        return ResponseEntity.ok(authService.verifyOtp(request));
+//    }
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
@@ -43,5 +43,9 @@ public class AuthController {
     public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authHeader) {
         authService.logout(authHeader.substring(7));
         return ResponseEntity.noContent().build();
+    }
+    @PostMapping("/firebase-login")
+    public ResponseEntity<AuthResponse> firebaseLogin(@Valid @RequestBody FirebaseLoginRequest request) {
+        return ResponseEntity.ok(authService.firebaseLogin(request));
     }
 }

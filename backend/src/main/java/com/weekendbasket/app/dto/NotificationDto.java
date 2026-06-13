@@ -17,8 +17,8 @@ public class NotificationDto {
     ) {}
 
     public record SendNotificationRequest(
-            @NotNull(message = "User ID is required")
-            Long userId,
+            @NotBlank(message = "Phone number is required")
+            String phoneNumber,
             @NotBlank(message = "Title is required")
             String title,
             @NotBlank(message = "Body is required")

@@ -30,6 +30,7 @@ export class VerifyOtpComponent implements OnInit, OnDestroy {
   phone = signal('');
   loading = signal(false);
   resendCooldown = signal(0);
+  referralCode = '';
 
   // 6 individual single-digit controls
   digits = new FormArray(
@@ -43,6 +44,9 @@ export class VerifyOtpComponent implements OnInit, OnDestroy {
     const nav = this.router.getCurrentNavigation();
     const phone = nav?.extras?.state?.['phone']
       ?? history.state?.['phone']
+      ?? '';
+    this.referralCode = nav?.extras?.state?.['referralCode']
+      ?? history.state?.['referralCode']
       ?? '';
 
     if (!phone) {
@@ -99,31 +103,33 @@ export class VerifyOtpComponent implements OnInit, OnDestroy {
     if (pasted.length === 6) this.verify();
   }
 
-  verify(): void {
+  async verify(): Promise<void> {
     const otp = this.digits.value.join('');
     if (otp.length !== 6) return;
 
     this.loading.set(true);
 
-    this.authService.verifyOtp({ phoneNumber: this.phone(), otp }).subscribe({
-      next: (res) => {
-        this.loading.set(false);
-        this.authService.redirectAfterLogin(res.isNewUser);
-      },
-      error: () => {
-        this.loading.set(false);
-        // Clear OTP boxes on error so user can re-enter
-        this.digits.controls.forEach(c => c.setValue(''));
-        this.otpBoxes.toArray()[0]?.nativeElement.focus();
-      }
-    });
+    try {
+      const res = await this.authService.verifyFirebaseOtp(otp, this.referralCode);
+      this.loading.set(false);
+      this.authService.redirectAfterLogin(res.isNewUser);
+    } catch (err: any) {
+      this.loading.set(false);
+      // Clear OTP boxes on error so user can re-enter
+      this.digits.controls.forEach(c => c.setValue(''));
+      this.otpBoxes.toArray()[0]?.nativeElement.focus();
+    }
   }
 
-  resendOtp(): void {
+  async resendOtp(): Promise<void> {
     if (this.resendCooldown() > 0) return;
-    this.authService.sendOtp(this.phone()).subscribe({
-      next: () => this.startCooldown()
-    });
+
+    try {
+      await this.authService.sendFirebaseOtp(this.phone());
+      this.startCooldown();
+    } catch (err: any) {
+      console.error('Resend OTP failed', err);
+    }
   }
 
   private startCooldown(): void {

@@ -4,6 +4,8 @@ import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { TokenService } from './token.service';
+import { Auth, RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from '@angular/fire/auth';
+import { firstValueFrom } from 'rxjs';
 
 export interface SendOtpRequest {
   phoneNumber: string;
@@ -30,15 +32,13 @@ export class AuthService {
   private http = inject(HttpClient);
   private tokenService = inject(TokenService);
   private router = inject(Router);
+  private firebaseAuth = inject(Auth);
 
   private readonly base = environment.apiBaseUrl;
+  private confirmationResult: ConfirmationResult | null = null;
+  private recaptchaVerifier: RecaptchaVerifier | null = null;
 
-  sendOtp(phoneNumber: string): Observable<{ message: string; phoneNumber: string }> {
-    return this.http.post<{ message: string; phoneNumber: string }>(
-      `${this.base}/auth/send-otp`,
-      { phoneNumber }
-    );
-  }
+  
 
   verifyOtp(req: VerifyOtpRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.base}/auth/verify-otp`, req).pipe(
@@ -67,4 +67,33 @@ export class AuthService {
       this.router.navigate([isNewUser ? '/customer/profile' : '/customer/home']);
     }
   }
+
+  async sendFirebaseOtp(phoneNumber: string): Promise<void> {
+  if (!this.recaptchaVerifier) {
+    this.recaptchaVerifier = new RecaptchaVerifier(this.firebaseAuth, 'recaptcha-container', {
+      size: 'invisible'
+    });
+  }
+  const e164 = '+91' + phoneNumber;
+  this.confirmationResult = await signInWithPhoneNumber(this.firebaseAuth, e164, this.recaptchaVerifier);
+}
+
+// ADD: verify OTP with Firebase, then exchange for app JWT
+async verifyFirebaseOtp(otp: string, referralCode?: string): Promise<AuthResponse> {
+  if (!this.confirmationResult) throw new Error('No OTP sent yet');
+  const credential = await this.confirmationResult.confirm(otp);
+  const firebaseToken = await credential.user.getIdToken();
+
+  return firstValueFrom(
+    this.http.post<AuthResponse>(`${this.base}/auth/firebase-login`, {
+      token: firebaseToken,
+      referralCode: referralCode ?? null
+    }).pipe(
+      tap(res => {
+        this.tokenService.save(res.token);
+        this.tokenService.saveUsername(res.username);
+      })
+    )
+  );
+}
 }

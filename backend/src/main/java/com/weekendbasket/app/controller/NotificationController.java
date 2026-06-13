@@ -57,7 +57,10 @@ public class NotificationController {
     @PostMapping("/send")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> sendToUser(@Valid @RequestBody SendNotificationRequest request) {
-        notificationService.sendToUser(request.userId(), request.title(), request.body(), request.type());
+        Long userId = userRepository.findByPhoneNumber(request.phoneNumber())
+                .orElseThrow(() -> new RuntimeException("User not found: " + request.phoneNumber()))
+                .getId();
+        notificationService.sendToUser(userId, request.title(), request.body(), request.type());
         return ResponseEntity.noContent().build();
     }
 

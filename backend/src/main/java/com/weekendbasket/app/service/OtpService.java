@@ -15,14 +15,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Random;
 
-@Service
-@RequiredArgsConstructor
+//@Service
+//@RequiredArgsConstructor
 public class OtpService {
 
     private static final Logger log = LogManager.getLogger(OtpService.class);
 
-    private final OtpVerificationRepository otpRepository;
-    private final OtpSendStrategy otpSendStrategy;
+//    private final OtpVerificationRepository otpRepository;
+//    private final OtpSendStrategy otpSendStrategy;
 
     @Value("${otp.expiry.minutes}")
     private int otpExpiryMinutes;
@@ -44,36 +44,36 @@ public class OtpService {
                 .verified(false)
                 .build();
 
-        otpRepository.save(otpVerification);
+//        otpRepository.save(otpVerification);
 
         // Delegate to active strategy — dev logs it, firebase sends real SMS
-        otpSendStrategy.send(phoneNumber, otp);
+//        otpSendStrategy.send(phoneNumber, otp);
 
         return otp;
     }
 
-    @Transactional
-    public void verifyOtp(String phoneNumber, String otpCode) {
-        OtpVerification otp = otpRepository
-                .findTopByPhoneNumberAndVerifiedFalseOrderByCreatedOnDesc(phoneNumber)
-                .orElseThrow(() -> new OtpExpiredException("No active OTP found. Please request a new OTP."));
-
-        if (otp.getAttempts() >= maxAttempts) {
-            throw new OtpMaxAttemptsException("Maximum OTP attempts exceeded. Please request a new OTP.");
-        }
-
-        if (LocalDateTime.now().isAfter(otp.getExpiresAt())) {
-            throw new OtpExpiredException("OTP has expired. Please request a new OTP.");
-        }
-
-        if (!otp.getOtpCode().equals(otpCode)) {
-            otp.setAttempts(otp.getAttempts() + 1);
-            otpRepository.save(otp);
-            throw new OtpExpiredException("Invalid OTP. " + (maxAttempts - otp.getAttempts()) + " attempts remaining.");
-        }
-
-        otp.setVerified(true);
-        otpRepository.save(otp);
-        log.info("OTP verified for phone: {}", phoneNumber);
-    }
+//    @Transactional
+//    public void verifyOtp(String phoneNumber, String otpCode) {
+//        OtpVerification otp = otpRepository
+//                .findTopByPhoneNumberAndVerifiedFalseOrderByCreatedOnDesc(phoneNumber)
+//                .orElseThrow(() -> new OtpExpiredException("No active OTP found. Please request a new OTP."));
+//
+//        if (otp.getAttempts() >= maxAttempts) {
+//            throw new OtpMaxAttemptsException("Maximum OTP attempts exceeded. Please request a new OTP.");
+//        }
+//
+//        if (LocalDateTime.now().isAfter(otp.getExpiresAt())) {
+//            throw new OtpExpiredException("OTP has expired. Please request a new OTP.");
+//        }
+//
+//        if (!otp.getOtpCode().equals(otpCode)) {
+//            otp.setAttempts(otp.getAttempts() + 1);
+//            otpRepository.save(otp);
+//            throw new OtpExpiredException("Invalid OTP. " + (maxAttempts - otp.getAttempts()) + " attempts remaining.");
+//        }
+//
+//        otp.setVerified(true);
+//        otpRepository.save(otp);
+//        log.info("OTP verified for phone: {}", phoneNumber);
+//    }
 }

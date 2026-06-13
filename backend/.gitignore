@@ -1,6 +1,7 @@
 # Local dev config — contains DB credentials, never commit
 application-local.properties
-
+# Ignore private Firebase service account credentials
+src/main/resources/firebase-service-account.json
 # Build output
 target/
 *.class
