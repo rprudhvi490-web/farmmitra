@@ -21,6 +21,7 @@ import com.weekendbasket.app.dto.AuthDto.LoginRequest;
 import com.weekendbasket.app.dto.AuthDto.SetPasswordRequest;
 import com.weekendbasket.app.model.OtpTracker;
 import com.weekendbasket.app.repository.OtpTrackerRepository;
+import com.weekendbasket.app.repository.UserRepository;
 import com.weekendbasket.app.service.AuthService;
 
 import jakarta.validation.Valid;
@@ -32,8 +33,8 @@ import lombok.RequiredArgsConstructor;
 public class AuthController {
 
     private final AuthService authService;
-
     private final OtpTrackerRepository trackerRepository;
+    private final UserRepository userRepository;
     
     @PostMapping("/firebase-login")
     public ResponseEntity<AuthResponse> firebaseLogin(@Valid @RequestBody FirebaseLoginRequest request) {
@@ -57,6 +58,36 @@ public class AuthController {
     public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authHeader) {
         authService.logout(authHeader.substring(7));
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Called before sending Firebase OTP for forgot-password flow.
+     * Verifies user exists + checks daily quota.
+     */
+    @PostMapping("/forgot-password/check")
+    public ResponseEntity<?> forgotPasswordCheck(@RequestBody Map<String, String> body) {
+        String phoneNumber = body.get("phoneNumber");
+        if (phoneNumber == null || !phoneNumber.matches("^[6-9]\\d{9}$")) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Invalid phone number."));
+        }
+        if (!userRepository.existsByPhoneNumber(phoneNumber)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "No account found with this number."));
+        }
+        return checkAndIncrementOtpQuota();
+    }
+
+    @PostMapping("/register/check")
+    public ResponseEntity<?> registerCheck(@RequestBody Map<String, String> body) {
+        String phoneNumber = body.get("phoneNumber");
+        if (phoneNumber == null || !phoneNumber.matches("^[6-9]\\d{9}$")) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Invalid phone number."));
+        }
+        if (userRepository.existsByPhoneNumber(phoneNumber)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("message", "This phone number is already registered."));
+        }
+        return checkAndIncrementOtpQuota();
     }
     
     @GetMapping("/check-quota")

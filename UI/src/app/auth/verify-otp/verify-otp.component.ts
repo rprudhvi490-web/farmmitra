@@ -28,6 +28,7 @@ export class VerifyOtpComponent implements OnInit, OnDestroy {
 
   phone = signal('');
   referralCode = signal('');
+  mode = signal<'login' | 'forgot-password' | 'register'>('login');
   loading = signal(false);
   resendCooldown = signal(0);
 
@@ -42,6 +43,7 @@ export class VerifyOtpComponent implements OnInit, OnDestroy {
     const state = nav?.extras?.state ?? history.state;
     const phone = state?.['phone'] ?? '';
     const referral = state?.['referralCode'] ?? '';
+    const mode = state?.['mode'] ?? 'login';
 
     if (!phone) {
       this.router.navigate(['/auth/login']);
@@ -50,6 +52,7 @@ export class VerifyOtpComponent implements OnInit, OnDestroy {
 
     this.phone.set(phone);
     this.referralCode.set(referral);
+    this.mode.set(mode);
     this.startCooldown();
   }
 
@@ -95,7 +98,11 @@ export class VerifyOtpComponent implements OnInit, OnDestroy {
     try {
       const res = await this.authService.verifyFirebaseOtp(otp, this.referralCode() || undefined);
       this.loading.set(false);
-      this.authService.redirectAfterLogin(res.isNewUser);
+      if (this.mode() === 'forgot-password') {
+        this.router.navigate(['/customer/profile'], { state: { forceSetPassword: true } });
+      } else {
+        this.authService.redirectAfterLogin(res.isNewUser);
+      }
     } catch (err: any) {
       this.loading.set(false);
       this.digits.controls.forEach(c => c.setValue(''));
@@ -107,10 +114,10 @@ export class VerifyOtpComponent implements OnInit, OnDestroy {
   async resendOtp(): Promise<void> {
     if (this.resendCooldown() > 0) return;
     try {
-      await this.authService.sendFirebaseOtp(this.phone());
+      await this.authService.sendFirebaseOtp(this.phone(), this.mode());
       this.startCooldown();
-    } catch (err) {
-      this.snackbar.open('Failed to resend OTP. Please try again.', 'Close', { duration: 3000 });
+    } catch (err: any) {
+      this.snackbar.open(err.error?.message ?? 'Failed to resend OTP. Please try again.', 'Close', { duration: 3000 });
     }
   }
 

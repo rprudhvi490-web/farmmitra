@@ -7,59 +7,45 @@
       <p>Fresh farm produce, delivered to your community</p>
     </div>
 
-    <mat-tab-group>
+    <form [formGroup]="passwordForm">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Mobile Number</mat-label>
+        <input matInput type="tel" inputmode="numeric" maxlength="10"
+               formControlName="phoneNumber" autocomplete="tel" />
+        @if (passwordForm.get('phoneNumber')!.touched && passwordForm.get('phoneNumber')!.hasError('required')) {
+          <mat-error>Mobile number is required</mat-error>
+        } @else if (passwordForm.get('phoneNumber')!.touched && passwordForm.get('phoneNumber')!.hasError('pattern')) {
+          <mat-error>Enter a valid 10-digit Indian mobile number</mat-error>
+        }
+      </mat-form-field>
 
-      <!-- OTP Tab -->
-      <mat-tab label="Login with OTP">
-        <div class="tab-content">
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Mobile Number</mat-label>
-            <input matInput type="tel" inputmode="numeric" maxlength="10"
-                   placeholder="Enter 10-digit mobile number"
-                   [formControl]="phone" autocomplete="tel" />
-            <mat-hint>We'll send a 6-digit OTP</mat-hint>
-            @if (phone.touched && phone.hasError('required')) {
-              <mat-error>Mobile number is required</mat-error>
-            } @else if (phone.touched && phone.hasError('pattern')) {
-              <mat-error>Enter a valid 10-digit Indian mobile number</mat-error>
-            }
-          </mat-form-field>
-          <button mat-flat-button type="button" class="full-width submit-btn"
-                  [disabled]="loading()" (click)="sendOtp()">
-            @if (loading()) { <mat-spinner diameter="20" /> } @else { Send OTP }
-          </button>
-        </div>
-      </mat-tab>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Password</mat-label>
+        <input matInput [type]="showPassword() ? 'text' : 'password'"
+               formControlName="password" autocomplete="current-password" />
+        <button mat-icon-button matSuffix type="button"
+                (click)="showPassword.set(!showPassword())">
+          <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        @if (passwordForm.get('password')!.touched && passwordForm.get('password')!.hasError('required')) {
+          <mat-error>Password is required</mat-error>
+        }
+      </mat-form-field>
+    </form>
 
-      <!-- Password Tab -->
-      <mat-tab label="Login with Password">
-        <div class="tab-content">
-          <p class="password-hint">Use this if you've previously set a password on your profile.</p>
-          <form [formGroup]="passwordForm">
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Mobile Number</mat-label>
-              <input matInput type="tel" inputmode="numeric" maxlength="10"
-                     formControlName="phoneNumber" />
-            </mat-form-field>
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Password</mat-label>
-              <input matInput [type]="showPassword() ? 'text' : 'password'"
-                     formControlName="password" />
-              <button mat-icon-button matSuffix type="button"
-                      (click)="showPassword.set(!showPassword())">
-                <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
-              </button>
-            </mat-form-field>
-          </form>
-          <button mat-flat-button type="button" class="full-width submit-btn"
-                  [disabled]="passwordLoading()" (click)="loginWithPassword()">
-            @if (passwordLoading()) { <mat-spinner diameter="20" /> } @else { Login }
-          </button>
-        </div>
-      </mat-tab>
+    @if (errorMsg()) {
+      <p class="error-msg">{{ errorMsg() }}</p>
+    }
 
-    </mat-tab-group>
+    <button mat-flat-button type="button" class="full-width submit-btn"
+            [disabled]="loading()" (click)="loginWithPassword()">
+      @if (loading()) { <mat-spinner diameter="20" /> } @else { Login }
+    </button>
+
+    <div class="bottom-links">
+      <a routerLink="/auth/forgot-password" class="forgot-link">Forgot Password?</a>
+      <a routerLink="/auth/register" class="register-link">New User? Register</a>
+    </div>
 
   </div>
 </div>
-<div id="recaptcha-container"></div>

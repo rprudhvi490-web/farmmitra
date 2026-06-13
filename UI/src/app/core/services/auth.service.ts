@@ -29,12 +29,14 @@ export class AuthService {
 
   // ── Firebase Phone Auth ───────────────────────────────────────────────────
 
-  async sendFirebaseOtp(phoneNumber: string): Promise<void> {
-    // 1. Check quota with Spring Boot + Neon DB before doing anything with Firebase
-    // If backend returns a 429 error, execution stops right here and passes the error to the component.
-    await firstValueFrom(
-      this.http.get<any>(`${this.base}/auth/check-quota`)
-    );
+  async sendFirebaseOtp(phoneNumber: string, mode: 'register' | 'forgot-password' | 'login' = 'register'): Promise<void> {
+    // For forgot-password/login: validate that the phone exists + check OTP quota.
+    // For registration: verify the number is new before checking quota.
+    const checkUrl = mode === 'register'
+      ? `${this.base}/auth/register/check`
+      : `${this.base}/auth/forgot-password/check`;
+
+    await firstValueFrom(this.http.post<any>(checkUrl, { phoneNumber }));
 
     // 2. If quota is ALLOWED, proceed with standard Firebase initialization
     if (!this.recaptchaVerifier) {

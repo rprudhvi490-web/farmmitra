@@ -1,0 +1,44 @@
+<div class="register-wrapper">
+  <div class="register-card">
+
+    <div class="brand">
+      <img src="farmmitra-logo.png" alt="FarmMitra" class="brand-logo" />
+      <h1>Register</h1>
+      <p>Create your new account using your mobile number</p>
+    </div>
+
+    <form [formGroup]="form">
+      <mat-form-field appearance="outline" class="full-width" subscriptSizing="fixed">
+        <mat-label>Mobile Number</mat-label>
+        <input matInput type="tel" inputmode="numeric" maxlength="10"
+               placeholder="Enter 10-digit mobile number"
+               formControlName="phoneNumber" autocomplete="tel" />
+        @if (form.get('phoneNumber')?.touched && form.get('phoneNumber')?.hasError('required')) {
+          <mat-error>Mobile number is required</mat-error>
+        } @else if (form.get('phoneNumber')?.touched && form.get('phoneNumber')?.hasError('pattern')) {
+          <mat-error>Enter a valid 10-digit Indian mobile number</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width" subscriptSizing="fixed">
+        <mat-label>Referral Code (optional)</mat-label>
+        <input matInput type="text" formControlName="referralCode" autocomplete="off" />
+      </mat-form-field>
+    </form>
+
+    @if (errorMsg()) {
+      <p class="error-msg">{{ errorMsg() }}</p>
+    }
+
+    <button mat-flat-button type="button" class="full-width submit-btn"
+            [disabled]="loading()" (click)="register()">
+      @if (loading()) { <mat-spinner diameter="20" /> } @else { Send OTP }
+    </button>
+
+    <div class="back-row">
+      <a routerLink="/auth/login" class="back-link">← Back to Login</a>
+    </div>
+
+  </div>
+</div>
+<div id="recaptcha-container"></div>
