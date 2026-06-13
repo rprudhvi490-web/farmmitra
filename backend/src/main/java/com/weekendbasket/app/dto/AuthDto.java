@@ -7,26 +7,9 @@ import jakarta.validation.constraints.Size;
 import java.util.List;
 
 public class AuthDto {
-	
-	public record FirebaseLoginRequest(
-		    @NotBlank(message = "Firebase token is required") String token,
-		    String referralCode
-		) {}
 
-    public record SendOtpRequest(
-            @NotBlank(message = "Phone number is required")
-            @Pattern(regexp = "^[6-9]\\d{9}$", message = "Invalid Indian phone number")
-            String phoneNumber
-    ) {}
-
-    public record VerifyOtpRequest(
-            @NotBlank(message = "Phone number is required")
-            @Pattern(regexp = "^[6-9]\\d{9}$", message = "Invalid Indian phone number")
-            String phoneNumber,
-
-            @NotBlank(message = "OTP is required")
-            String otp,
-
+    public record FirebaseLoginRequest(
+            @NotBlank(message = "Firebase token is required") String token,
             String referralCode
     ) {}
 
@@ -55,11 +38,6 @@ public class AuthDto {
             String username,
             List<String> roles,
             boolean isNewUser,
-            boolean hasPassword   // tells mobile app whether to show password login option
-    ) {}
-
-    public record SendOtpResponse(
-            String message,
-            String phoneNumber
+            boolean hasPassword
     ) {}
 }

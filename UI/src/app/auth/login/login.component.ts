@@ -43,20 +43,33 @@ export class LoginComponent {
   showPassword = signal(false);
 
   async sendOtp(): Promise<void> {
-
-  if (this.phone.invalid) { this.phone.markAsTouched(); return; }
-  this.loading.set(true);
-  try {
-    const rawNumber = this.phone.value; // e.g., "9876543210"
-  
-    await this.authService.sendFirebaseOtp(rawNumber!);
-    this.loading.set(false);
-    this.router.navigate(['/auth/verify'], { state: { phone: this.phone.value } });
-  } catch (err: any) {
-    this.loading.set(false);
-    console.error('Firebase OTP error', err);
+    if (this.phone.invalid) { 
+      this.phone.markAsTouched(); 
+      return; 
+    }
+    
+    this.loading.set(true);
+    
+    try {
+      const rawNumber = this.phone.value; // e.g., "9876543210"
+    
+      // This calls our updated AuthService, running the Spring Boot check first!
+      await this.authService.sendFirebaseOtp(rawNumber!);
+      
+      this.loading.set(false);
+      this.router.navigate(['/auth/verify'], { state: { phone: this.phone.value } });
+    } catch (err: any) {
+      this.loading.set(false);
+      
+      // Explicitly check for our Spring Boot 429 Limit Block
+      if (err.status === 429) {
+        alert("Daily application limit reached. Please try again tomorrow!");
+      } else {
+        console.error('Firebase OTP error', err);
+        alert("Failed to send OTP. Please check your network or try again.");
+      }
+    }
   }
-}
 
   loginWithPassword(): void {
     if (this.passwordForm.invalid) { this.passwordForm.markAllAsTouched(); return; }

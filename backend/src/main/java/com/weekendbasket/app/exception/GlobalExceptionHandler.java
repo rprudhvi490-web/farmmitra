@@ -29,17 +29,7 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
-    @ExceptionHandler(OtpExpiredException.class)
-    public ResponseEntity<ErrorResponse> handleOtpExpiredException(OtpExpiredException ex) {
-        return build(HttpStatus.BAD_REQUEST, ex.getMessage());
-    }
-
-    @ExceptionHandler(OtpMaxAttemptsException.class)
-    public ResponseEntity<ErrorResponse> handleOtpMaxAttemptsException(OtpMaxAttemptsException ex) {
-        return build(HttpStatus.TOO_MANY_REQUESTS, ex.getMessage());
-    }
-
-    @ExceptionHandler(AccessDeniedException.class)
+@ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException ex) {
         return build(HttpStatus.FORBIDDEN, "Access denied");
     }

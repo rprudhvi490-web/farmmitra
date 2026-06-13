@@ -1,21 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap } from 'rxjs';
+import { firstValueFrom, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { TokenService } from './token.service';
 import { Auth, RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from '@angular/fire/auth';
-import { firstValueFrom } from 'rxjs';
-
-export interface SendOtpRequest {
-  phoneNumber: string;
-}
-
-export interface VerifyOtpRequest {
-  phoneNumber: string;
-  otp: string;
-  referralCode?: string;
-}
 
 export interface AuthResponse {
   token: string;
@@ -38,23 +27,55 @@ export class AuthService {
   private confirmationResult: ConfirmationResult | null = null;
   private recaptchaVerifier: RecaptchaVerifier | null = null;
 
-  
+  // ── Firebase Phone Auth ───────────────────────────────────────────────────
 
-  verifyOtp(req: VerifyOtpRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.base}/auth/verify-otp`, req).pipe(
-      tap(res => { this.tokenService.save(res.token); this.tokenService.saveUsername(res.username); })
+  async sendFirebaseOtp(phoneNumber: string): Promise<void> {
+    // 1. Check quota with Spring Boot + Neon DB before doing anything with Firebase
+    // If backend returns a 429 error, execution stops right here and passes the error to the component.
+    await firstValueFrom(
+      this.http.get<any>(`${this.base}/auth/check-quota`)
+    );
+
+    // 2. If quota is ALLOWED, proceed with standard Firebase initialization
+    if (!this.recaptchaVerifier) {
+      this.recaptchaVerifier = new RecaptchaVerifier(this.firebaseAuth, 'recaptcha-container', {
+        size: 'invisible'
+      });
+    }
+    const e164 = '+91' + phoneNumber;
+    this.confirmationResult = await signInWithPhoneNumber(this.firebaseAuth, e164, this.recaptchaVerifier);
+  }
+
+  async verifyFirebaseOtp(otp: string, referralCode?: string): Promise<AuthResponse> {
+    if (!this.confirmationResult) throw new Error('No OTP sent yet');
+    const credential = await this.confirmationResult.confirm(otp);
+    const firebaseToken = await credential.user.getIdToken();
+
+    return firstValueFrom(
+      this.http.post<AuthResponse>(`${this.base}/auth/firebase-login`, {
+        token: firebaseToken,
+        referralCode: referralCode ?? null
+      }).pipe(
+        tap(res => {
+          this.tokenService.save(res.token);
+          this.tokenService.saveUsername(res.username);
+        })
+      )
     );
   }
+
+  // ── Logout ────────────────────────────────────────────────────────────────
 
   logout(): void {
     const token = this.tokenService.get();
     this.tokenService.remove();
-    // Fire and forget — backend invalidates token, we don't wait
     if (token) {
       this.http.post(`${this.base}/auth/logout`, {}).subscribe();
     }
     this.router.navigate(['/auth/login']);
   }
+
+  // ── Redirect after login ──────────────────────────────────────────────────
 
   redirectAfterLogin(isNewUser: boolean): void {
     if (this.tokenService.isAdmin()) {
@@ -67,33 +88,4 @@ export class AuthService {
       this.router.navigate([isNewUser ? '/customer/profile' : '/customer/home']);
     }
   }
-
-  async sendFirebaseOtp(phoneNumber: string): Promise<void> {
-  if (!this.recaptchaVerifier) {
-    this.recaptchaVerifier = new RecaptchaVerifier(this.firebaseAuth, 'recaptcha-container', {
-      size: 'invisible'
-    });
-  }
-  const e164 = '+91' + phoneNumber;
-  this.confirmationResult = await signInWithPhoneNumber(this.firebaseAuth, e164, this.recaptchaVerifier);
-}
-
-// ADD: verify OTP with Firebase, then exchange for app JWT
-async verifyFirebaseOtp(otp: string, referralCode?: string): Promise<AuthResponse> {
-  if (!this.confirmationResult) throw new Error('No OTP sent yet');
-  const credential = await this.confirmationResult.confirm(otp);
-  const firebaseToken = await credential.user.getIdToken();
-
-  return firstValueFrom(
-    this.http.post<AuthResponse>(`${this.base}/auth/firebase-login`, {
-      token: firebaseToken,
-      referralCode: referralCode ?? null
-    }).pipe(
-      tap(res => {
-        this.tokenService.save(res.token);
-        this.tokenService.saveUsername(res.username);
-      })
-    )
-  );
-}
 }
