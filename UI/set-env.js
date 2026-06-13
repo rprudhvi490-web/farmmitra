@@ -1,8 +1,15 @@
 const fs = require('fs');
 const path = require('path');
 
-// Target path where the production environment file lives
-const targetPath = path.join(__dirname, './src/environments/environment.prod.ts');
+// Target paths for BOTH files Angular expects to see
+const devPath = path.join(__dirname, './src/environments/environment.ts');
+const prodPath = path.join(__dirname, './src/environments/environment.prod.ts');
+
+// Ensure the directory exists (just in case)
+const dir = path.join(__dirname, './src/environments');
+if (!fs.existsSync(dir)){
+    fs.mkdirSync(dir, { recursive: true });
+}
 
 // Environment file blueprint reading straight from Netlify's system environment variables
 const envConfigFile = `export const environment = {
@@ -18,6 +25,8 @@ const envConfigFile = `export const environment = {
 };
 `;
 
-// Write the file to disk right before building the Angular app
-fs.writeFileSync(targetPath, envConfigFile, 'utf8');
-console.log('Angular environment.prod.ts generated dynamically.');
+// Write to BOTH locations so the build handles cross-references flawlessly
+fs.writeFileSync(devPath, envConfigFile, 'utf8');
+fs.writeFileSync(prodPath, envConfigFile, 'utf8');
+
+console.log('Angular environment files generated dynamically for both dev and prod targets.');
